@@ -116,12 +116,14 @@ body.afternoon .noon-glow { opacity:1; }
 
 /* ── Layout ── */
 .app {
-  max-width:720px; width:100%; margin:0 auto; padding:200px 16px 22px;
+  max-width:720px; width:100%; margin:0 auto; padding:200px 16px 40px;
   display:flex; flex-direction:column;
   gap:16px; min-height:100vh;
   position:relative; z-index:1;
   box-sizing:border-box;
   overflow-x:hidden;
+  background:var(--bg);
+  transition:background var(--transition-speed);
 }
 
 /* ══ TRANSITIONS for all surfaces ══ */
@@ -272,21 +274,16 @@ body.night .npc-token { filter:drop-shadow(0 2px 8px rgba(0,0,0,.8)); }
 /* ── Left col ── */
 .left-col { display:flex;flex-direction:column;gap:14px; }
 
-@keyframes glowPulseDay { 0%,100%{box-shadow:0 0 6px rgba(176,120,64,.1);}50%{box-shadow:0 0 16px rgba(176,120,64,.25);} }
-@keyframes glowPulseNight { 0%,100%{box-shadow:0 0 8px rgba(200,150,90,.12);}50%{box-shadow:0 0 22px rgba(200,150,90,.3);} }
 
 .timer-card {
   background:var(--surface);border:1px solid var(--border);
   border-radius:16px;padding:16px;display:flex;flex-direction:column;gap:10px;
 }
-body.morning .timer-card, body.afternoon .timer-card { animation:glowPulseDay 5s ease-in-out infinite; }
-body.night .timer-card { animation:glowPulseNight 6s ease-in-out infinite; }
 
 .timer-display {
   text-align:center;font-family:'Hiragino Maru Gothic ProN','Yu Gothic',sans-serif;
   font-size:44px;color:var(--accent);letter-spacing:.06em;line-height:1;padding:6px 0;
 }
-body.night .timer-display { text-shadow:0 0 26px rgba(200,150,90,.45); }
 
 .timer-label { text-align:center;font-size:11px;color:var(--muted);letter-spacing:.12em; }
 .timer-btns { display:flex;gap:8px; }
@@ -585,7 +582,7 @@ body.night .cat-btn.active { color:#0f0e14; }
 
 @media(max-width:480px){
   .floor-wrap { height:160px; }
-  .hours-badge { display:none; }
+  .hours-badge { font-size:9px; padding:3px 7px; }
 }
 
 /* ── NPC Profile Modal ── */
@@ -638,19 +635,7 @@ body.night .cat-btn.active { color:#0f0e14; }
 .app-fixed {
   flex-shrink:0;
 }
-.app-scroll {
-  flex:1;
-  overflow-y:auto;
-  overflow-x:hidden;
-  padding:0 16px 22px;
-  max-width:720px;
-  width:100%;
-  margin:0 auto;
-  box-sizing:border-box;
-}
-.app-scroll::-webkit-scrollbar { width:4px; }
-.app-scroll::-webkit-scrollbar-track { background:transparent; }
-.app-scroll::-webkit-scrollbar-thumb { background:var(--border); border-radius:2px; }
+
 
 
 /* ── Fixed header + ticker ── */
@@ -708,13 +693,8 @@ body.night .cat-btn.active { color:#0f0e14; }
   color: var(--text2);
   transition: background var(--transition-speed), border-color var(--transition-speed);
 }
-.master-notice-icon {
-  font-size: 14px;
-  flex-shrink: 0;
-}
-.master-notice-text {
-  flex: 1;
-}
+.master-notice-icon { font-size: 14px; flex-shrink: 0; }
+.master-notice-text { flex: 1; }
 </style>
 </head>
 <body>
@@ -822,11 +802,8 @@ body.night .cat-btn.active { color:#0f0e14; }
     <div class="waiter-item" id="waiter-item">☕</div>
   </div>
 </div>
-  </div>
 
-  <!-- app-scroll: timer + tasks scroll below -->
-  <div class="app-scroll">
-  <!-- Left col -->
+  <!-- Timer + Tasks -->
   <div class="left-col">
     <div class="progress-area">
       <div class="progress-header"><span id="progress-label">今日の進捗</span><span id="progress-text">0 / 0 完了</span></div>
@@ -851,7 +828,7 @@ body.night .cat-btn.active { color:#0f0e14; }
       </div>
     </div>
         </div>
-  </div>
+  
 
   </div>
 
@@ -893,9 +870,9 @@ const PM={
     cl:'カウンター 🍰',dc:'🌿',
   },
   night:{
-    icon:'🕯️',title:'深夜カフェ',hours:'17:00〜5:00',sub:'夜も、ここで作業していこう',
-    ct:'💬 深夜カフェチャット',cs:'みんなまだいる',
-    sm:'— 深夜カフェへようこそ 🕯️ —',
+    icon:'🕯️',title:'夜カフェ',hours:'17:00〜5:00',sub:'夜も、ここで作業していこう',
+    ct:'💬 夜カフェチャット',cs:'みんなまだいる',
+    sm:'— 夜カフェへようこそ 🕯️ —',
     bi:'🌙',pl:'今夜の進捗',tbl:'休憩中 🌙',pb:'🌙 夜',
     ff:'#17151f',fs:'#2e2a3d',tf:'#1e1b28',ts:'#3d3857',cf:'#17151f',
     cl:'カウンター ☕',dc:'🕯',
