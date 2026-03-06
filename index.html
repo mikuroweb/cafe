@@ -1138,22 +1138,37 @@ function drawFloor(){
 
 // ══ TOKENS ══
 function mkEl(tag,cls,txt){const e=document.createElement(tag);if(cls)e.className=cls;if(txt!=null)e.textContent=txt;return e;}
+function getSVGRect(){
+  const wrap=document.getElementById('floor-wrap');
+  const ww=wrap.clientWidth, wh=wrap.clientHeight;
+  const vbW=560, vbH=190;
+  const scale=Math.min(ww/vbW, wh/vbH);
+  const rw=vbW*scale, rh=vbH*scale;
+  const ox=(ww-rw)/2, oy=(wh-rh)/2;
+  return {ox,oy,rw,rh};
+}
 function placeToken(id,spotKey,animate){
   const sp=SPOTS[spotKey];
   const el=document.getElementById('token-'+id);
   if(!el)return;
-  const left=(sp.fx*100)+'%';
-  const top=(sp.fy*100)+'%';
+  const r=getSVGRect();
+  const left=(r.ox + sp.fx*r.rw)+'px';
+  const top=(r.oy + sp.fy*r.rh)+'px';
   if(!animate){const p=el.style.transition;el.style.transition='none';el.style.left=left;el.style.top=top;requestAnimationFrame(function(){el.style.transition=p;});}
   else{el.style.left=left;el.style.top=top;}
 }
 function placeUserToken(k){
   const sp=SPOTS[k],el=document.getElementById('token-user');
   el.style.display='flex';
-  el.style.left=(sp.fx*100)+'%';el.style.top=(sp.fy*100)+'%';
+  const r=getSVGRect();
+  el.style.left=(r.ox + sp.fx*r.rw)+'px';
+  el.style.top=(r.oy + sp.fy*r.rh)+'px';
 }
 function initTokens(){Object.keys(NS).forEach(function(id){placeToken(id,NS[id].spot,false);});buildHotspots();updateAllLocs();}
 window.addEventListener('resize',function(){
+  Object.keys(NS).forEach(function(id){placeToken(id,NS[id].spot,false);});
+  if(userSpot)placeUserToken(userSpot);
+  if(gs.active&&gs.spot)placeToken('guest',gs.spot,false);
   buildHotspots();
 });
 function updateAllLocs(){
