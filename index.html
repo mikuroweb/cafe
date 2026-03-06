@@ -206,7 +206,7 @@ body.afternoon .noon-glow { opacity:1; }
 }
 .floor-svg { width:100%;height:100%;position:absolute;top:0;left:0; }
 
-@keyframes float{0%,100%{transform:translateY(0);}50%{transform:translateY(-2px);}}
+@keyframes float{0%,100%{margin-top:0;}50%{margin-top:-2px;}}
 @keyframes pulse{0%,100%{opacity:1;}50%{opacity:.35;}}
 
 .npc-token {
@@ -240,6 +240,7 @@ body.night .npc-token { filter:drop-shadow(0 2px 8px rgba(0,0,0,.8)); }
   position:absolute;width:28px;height:28px;border-radius:50%;
   background:var(--surface3);border:2px solid #8866cc;
   display:none;align-items:center;justify-content:center;font-size:14px;
+  transform:translate(-50%,-50%);
   transition: left 1.2s cubic-bezier(.4,0,.2,1), top 1.2s cubic-bezier(.4,0,.2,1);
   z-index:12;filter:drop-shadow(0 0 8px rgba(140,100,220,.5));
   animation:float 2s ease-in-out infinite;pointer-events:none;
@@ -1138,24 +1139,21 @@ function drawFloor(){
 // ══ TOKENS ══
 function mkEl(tag,cls,txt){const e=document.createElement(tag);if(cls)e.className=cls;if(txt!=null)e.textContent=txt;return e;}
 function placeToken(id,spotKey,animate){
-  const w=document.getElementById('floor-wrap');
   const sp=SPOTS[spotKey];
-  const left=w.clientWidth*sp.fx-13,top=w.clientHeight*sp.fy-13;
   const el=document.getElementById('token-'+id);
   if(!el)return;
-  if(!animate){const p=el.style.transition;el.style.transition='none';el.style.left=left+'px';el.style.top=top+'px';requestAnimationFrame(function(){el.style.transition=p;});}
-  else{el.style.left=left+'px';el.style.top=top+'px';}
+  const left=(sp.fx*100)+'%';
+  const top=(sp.fy*100)+'%';
+  if(!animate){const p=el.style.transition;el.style.transition='none';el.style.left=left;el.style.top=top;requestAnimationFrame(function(){el.style.transition=p;});}
+  else{el.style.left=left;el.style.top=top;}
 }
 function placeUserToken(k){
-  const w=document.getElementById('floor-wrap'),sp=SPOTS[k],el=document.getElementById('token-user');
+  const sp=SPOTS[k],el=document.getElementById('token-user');
   el.style.display='flex';
-  el.style.left=(w.clientWidth*sp.fx-14)+'px';el.style.top=(w.clientHeight*sp.fy-14)+'px';
+  el.style.left=(sp.fx*100)+'%';el.style.top=(sp.fy*100)+'%';
 }
 function initTokens(){Object.keys(NS).forEach(function(id){placeToken(id,NS[id].spot,false);});buildHotspots();updateAllLocs();}
 window.addEventListener('resize',function(){
-  Object.keys(NS).forEach(function(id){placeToken(id,NS[id].spot,false);});
-  if(userSpot)placeUserToken(userSpot);
-  if(gs.active&&gs.spot)placeToken('guest',gs.spot,false);
   buildHotspots();
 });
 function updateAllLocs(){
