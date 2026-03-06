@@ -114,12 +114,12 @@ body.afternoon .noon-glow { opacity:1; }
 
 /* ── Layout ── */
 .app {
-  max-width:1120px; margin:0 auto; padding:22px 16px;
+  max-width:720px; margin:0 auto; padding:22px 16px;
   display:grid;
-  grid-template-columns: 1fr 340px;
-  grid-template-rows: auto auto 1fr;
+  grid-template-columns: 1fr;
   gap:16px; min-height:100vh;
   position:relative; z-index:1;
+  align-items:start;
 }
 
 /* ══ TRANSITIONS for all surfaces ══ */
@@ -356,10 +356,10 @@ body.night .add-btn { color:#0f0e14; }
 
 /* ── Chatroom ── */
 .chatroom {
-  grid-column:2;grid-row:3;
+  grid-column:1;grid-row:auto;
   background:var(--surface);border:1px solid var(--border);
   border-radius:18px;display:flex;flex-direction:column;
-  max-height:680px;position:sticky;top:22px;overflow:hidden;
+  max-height:480px;position:static;overflow:hidden;
 }
 .chat-header {
   padding:12px 14px 10px;border-bottom:1px solid var(--border);
@@ -579,8 +579,11 @@ body.night .cat-btn.active { color:#0f0e14; }
 
 @media(max-width:720px){
   .app { grid-template-columns:1fr; }
-  .chatroom { grid-column:1;grid-row:auto;position:static;max-height:460px; }
-  .floor-wrap { max-height:160px; }
+  .music-ticker-wrap { grid-column:1; }
+  .map-card { grid-column:1; }
+  .chatroom { grid-column:1;grid-row:auto;position:static;height:auto;max-height:480px; }
+  .floor-wrap { height:160px; }
+  .hours-badge { display:none; }
 }
 
 /* ── NPC Profile Modal ── */
