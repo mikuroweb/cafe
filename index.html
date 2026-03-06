@@ -1,0 +1,1753 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>カフェ作業 ☕</title>
+
+<style>
+/* ══════════════════════════════════════
+   CSS変数 — 時間帯テーマで上書き
+══════════════════════════════════════ */
+:root {
+  /* morning default */
+  --bg:        #f0ebe0;
+  --surface:   #faf6ef;
+  --surface2:  #f0e8d8;
+  --surface3:  #e8dcc8;
+  --border:    #ddd0b8;
+  --border2:   #ccc0a0;
+  --accent:    #b07840;
+  --accent2:   #8a5c28;
+  --accent-glow: rgba(176,120,64,.15);
+  --text:      #3a2810;
+  --text2:     #6a4e30;
+  --muted:     #9a8060;
+  --muted2:    #c0a880;
+  --green:     #5a9070;
+  --rose:      #c07060;
+  --teal:      #5a8890;
+  --indigo:    #7878b0;
+  --sky:       #88aacc;
+  --header-border: rgba(176,120,64,.3);
+  --transition-speed: 2s;
+}
+
+/* ── MORNING (5–11) ── */
+body.morning {
+  --bg:#f0ebe0; --surface:#faf6ef; --surface2:#f0e8d8; --surface3:#e8dcc8;
+  --border:#ddd0b8; --border2:#ccc0a0;
+  --accent:#c08840; --accent2:#8a5c28;
+  --text:#3a2810; --text2:#6a4e30; --muted:#9a8060; --muted2:#c0a880;
+  --green:#4a8860; --sky:#88aacc;
+  --header-border: rgba(192,136,64,.35);
+}
+/* ── AFTERNOON (11–17) ── */
+body.afternoon {
+  --bg:#ede8df; --surface:#f7f2e8; --surface2:#ede4d4; --surface3:#e2d8c4;
+  --border:#d4c8a8; --border2:#c0b090;
+  --accent:#a07030; --accent2:#705020;
+  --text:#2e2010; --text2:#5a3c20; --muted:#886844; --muted2:#b09060;
+  --green:#4a8050; --sky:#7090b0;
+  --header-border: rgba(160,112,48,.35);
+}
+/* ── NIGHT (17–5) ── */
+body.night {
+  --bg:#0f0e14; --surface:#17151f; --surface2:#1e1b28; --surface3:#231f2e;
+  --border:#2e2a3d; --border2:#3d3857;
+  --accent:#c8965a; --accent2:#8a6035;
+  --text:#e8e0d4; --text2:#b0a090; --muted:#7a7090; --muted2:#4d4860;
+  --green:#5a9e7a; --sky:#7a9eb0;
+  --header-border: rgba(200,150,90,.3);
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family:'Hiragino Maru Gothic ProN','Yu Gothic',sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+  transition: background var(--transition-speed) ease, color var(--transition-speed) ease;
+}
+
+/* ── Noise texture overlay ── */
+body::before {
+  content:'';
+  position:fixed; inset:0; z-index:0; pointer-events:none;
+  background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='4' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='200' height='200' filter='url(%23n)' opacity='0.03'/%3E%3C/svg%3E");
+}
+
+/* night sky gradient */
+.night-sky {
+  position:fixed;inset:0;pointer-events:none;z-index:0;
+  background: radial-gradient(ellipse at 50% 0%, #1a1530 0%, #0a0910 60%, #060508 100%);
+  opacity:0;transition:opacity 3s;
+}
+body.night .night-sky { opacity:1; }
+
+/* night stars */
+.stars { position:fixed;inset:0;pointer-events:none;z-index:0;overflow:hidden;opacity:0;transition:opacity 3s; }
+body.night .stars { opacity:1; }
+.star { position:absolute;border-radius:50%;background:#fff;box-shadow:0 0 2px #fff; }
+@keyframes twinkle { 0%,100%{opacity:var(--op);}50%{opacity:calc(var(--op)*0.3);} }
+
+/* morning sun glow */
+.sun-glow {
+  position:fixed;top:-120px;left:50%;transform:translateX(-50%);
+  width:400px;height:300px;
+  background:radial-gradient(ellipse,rgba(255,200,80,.18) 0%,transparent 70%);
+  pointer-events:none;z-index:0;
+  opacity:0;transition:opacity 2s;
+}
+body.morning .sun-glow { opacity:1; }
+
+/* afternoon warm diffuse */
+.noon-glow {
+  position:fixed;top:0;right:0;
+  width:300px;height:300px;
+  background:radial-gradient(ellipse at top right,rgba(200,160,80,.1) 0%,transparent 70%);
+  pointer-events:none;z-index:0;
+  opacity:0;transition:opacity 2s;
+}
+body.afternoon .noon-glow { opacity:1; }
+
+/* ── Layout ── */
+.app {
+  max-width:1120px; margin:0 auto; padding:22px 16px;
+  display:grid;
+  grid-template-columns: 1fr 340px;
+  grid-template-rows: auto auto 1fr;
+  gap:16px; min-height:100vh;
+  position:relative; z-index:1;
+}
+
+/* ══ TRANSITIONS for all surfaces ══ */
+.app *[class] {
+  transition:
+    background var(--transition-speed) ease,
+    border-color var(--transition-speed) ease,
+    color var(--transition-speed) ease,
+    box-shadow var(--transition-speed) ease;
+}
+
+/* ── Header ── */
+.header {
+  grid-column:1/-1; display:flex; align-items:center; justify-content:center; gap:10px;
+  padding-bottom:16px; border-bottom:1px solid var(--header-border);
+  position:relative;
+}
+.header::after {
+  content:'';position:absolute;bottom:-1px;left:0;right:0;height:1px;
+  background:linear-gradient(to right,transparent,var(--accent2),transparent);
+}
+.header-icon { font-size:28px; line-height:1; }
+.header-title { font-size:18px;font-weight:700;color:var(--accent);letter-spacing:.04em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis; }
+.header-sub { font-size:12px;color:var(--muted);margin-top:2px; }
+.hours-badge {
+  font-size:10px;color:var(--muted);background:var(--surface2);
+  border:1px solid var(--border);border-radius:20px;
+  padding:4px 10px;white-space:nowrap;flex-shrink:0;line-height:1.4;text-align:center;
+}
+.time-badge {
+  background:var(--surface2); border:1px solid var(--border2);
+  border-radius:20px; padding:6px 15px; font-size:13px; color:var(--accent);
+  font-family:'Hiragino Maru Gothic ProN','Yu Gothic',sans-serif; letter-spacing:.08em;
+}
+.time-period-badge {
+  background:var(--surface2); border:1px solid var(--border);
+  border-radius:20px; padding:5px 12px; font-size:11px; color:var(--muted);
+  letter-spacing:.06em; display:flex; align-items:center; gap:5px;
+  white-space:nowrap; flex-shrink:0; line-height:1;
+}
+
+/* ── Floor Map ── */
+.map-card {
+  grid-column:1/-1; background:var(--surface); border:1px solid var(--border);
+  border-radius:18px; padding:14px 16px; display:flex; flex-direction:column; gap:10px;
+}
+.map-top { display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:8px; }
+.map-label { font-size:11px;font-weight:700;color:var(--muted);letter-spacing:.1em;display:flex;align-items:center;gap:5px;text-transform:uppercase; }
+.map-legend { display:flex; gap:12px; flex-wrap:wrap; }
+.legend-item { display:flex;align-items:center;gap:5px;font-size:11px;color:var(--muted); }
+.legend-dot { width:8px;height:8px;border-radius:50%; }
+
+.music-ticker-wrap {
+  grid-column:1/-1;
+  width:100%;overflow:hidden;
+  background:var(--surface2);border:1px solid var(--border);border-radius:8px;
+  padding:5px 0;position:relative;
+}
+.music-ticker-wrap::before {
+  content:'';position:absolute;left:0;top:0;bottom:0;width:32px;
+  background:linear-gradient(to right,var(--surface2),transparent);z-index:2;
+}
+.music-ticker-wrap::after {
+  content:'';position:absolute;right:0;top:0;bottom:0;width:32px;
+  background:linear-gradient(to left,var(--surface2),transparent);z-index:2;
+}
+.music-ticker {
+  display:flex;gap:0;white-space:nowrap;
+  will-change:transform;
+}
+.music-ticker:hover { animation-play-state:paused; }
+.ticker-item {
+  display:inline-flex;align-items:center;gap:6px;
+  padding:0 10px;font-size:11px;color:var(--text2);
+  cursor:default;transition:color .2s;
+}
+.ticker-item:hover { color:var(--text); }
+.ticker-note { font-size:13px;opacity:.7; }
+.ticker-sep { color:var(--muted2);padding:0 4px; }
+/* ticker animation handled by JS */
+.floor-wrap {
+  position:relative; width:100%; height:190px;
+}
+.floor-svg { width:100%;height:100%;position:absolute;top:0;left:0; }
+
+@keyframes float{0%,100%{transform:translateY(0);}50%{transform:translateY(-2px);}}
+@keyframes pulse{0%,100%{opacity:1;}50%{opacity:.35;}}
+
+.npc-token {
+  position:absolute;width:26px;height:26px;border-radius:50%;border:2px solid;
+  display:flex;align-items:center;justify-content:center;font-size:13px;
+  transition: left 2.1s cubic-bezier(.4,0,.2,1), top 2.1s cubic-bezier(.4,0,.2,1),
+              background var(--transition-speed), border-color var(--transition-speed);
+  z-index:10;filter:drop-shadow(0 2px 5px rgba(0,0,0,.3));
+  animation:float 2.6s ease-in-out infinite;
+}
+body.night .npc-token { filter:drop-shadow(0 2px 8px rgba(0,0,0,.8)); }
+.npc-token .tlabel {
+  position:absolute;top:-18px;left:50%;transform:translateX(-50%);
+  font-size:9px;color:var(--muted);white-space:nowrap;
+  background:var(--surface2);border:1px solid var(--border);
+  border-radius:4px;padding:1px 5px;pointer-events:none;
+}
+.npc-token.haru { background:var(--surface2);border-color:var(--accent2); }
+.npc-token.mia  { background:var(--surface2);border-color:var(--green); }
+.npc-token.sou  { background:var(--surface2);border-color:var(--indigo); }
+
+/* guest token — border color set dynamically */
+.npc-token.guest-token {
+  background:var(--surface2);
+  border-color: var(--guest-border, #9966cc);
+  animation:float 2.2s ease-in-out infinite;
+}
+.guest-chip { border-color: rgba(140,100,200,.4) !important; }
+
+.user-token {
+  position:absolute;width:28px;height:28px;border-radius:50%;
+  background:var(--surface3);border:2px solid #8866cc;
+  display:none;align-items:center;justify-content:center;font-size:14px;
+  transition: left 1.2s cubic-bezier(.4,0,.2,1), top 1.2s cubic-bezier(.4,0,.2,1);
+  z-index:12;filter:drop-shadow(0 0 8px rgba(140,100,220,.5));
+  animation:float 2s ease-in-out infinite;pointer-events:none;
+}
+.user-token .tlabel {
+  position:absolute;top:-18px;left:50%;transform:translateX(-50%);
+  font-size:9px;color:#aa88ee;white-space:nowrap;
+  background:var(--surface2);border:1px solid #4a3a70;
+  border-radius:4px;padding:1px 5px;pointer-events:none;
+}
+
+.seat-hotspot {
+  position:absolute;width:20px;height:20px;border-radius:50%;cursor:pointer;z-index:11;
+  background:rgba(140,100,220,.0);border:1.5px dashed rgba(140,100,220,.0);
+  transition:background .2s,border-color .2s,transform .15s;
+  transform:translate(-50%,-50%);
+}
+.seat-hotspot:hover { background:rgba(140,100,220,.25);border-color:rgba(140,100,220,.7);transform:translate(-50%,-50%) scale(1.3); }
+.seat-hotspot.occupied-npc { cursor:not-allowed; }
+.seat-hotspot.occupied-npc:hover { background:rgba(180,60,60,.15);border-color:rgba(180,60,60,.4);transform:translate(-50%,-50%) scale(1.05); }
+.seat-hotspot.user-here { background:rgba(140,100,220,.2);border-color:rgba(140,100,220,.6);animation:pulse 2s infinite; }
+.map-hint { font-size:11px;color:var(--muted2);text-align:center;letter-spacing:.04em; }
+
+/* ── Left col ── */
+.left-col { display:flex;flex-direction:column;gap:14px; }
+
+@keyframes glowPulseDay { 0%,100%{box-shadow:0 0 6px rgba(176,120,64,.1);}50%{box-shadow:0 0 16px rgba(176,120,64,.25);} }
+@keyframes glowPulseNight { 0%,100%{box-shadow:0 0 8px rgba(200,150,90,.12);}50%{box-shadow:0 0 22px rgba(200,150,90,.3);} }
+
+.timer-card {
+  background:var(--surface);border:1px solid var(--border);
+  border-radius:16px;padding:16px;display:flex;flex-direction:column;gap:10px;
+}
+body.morning .timer-card, body.afternoon .timer-card { animation:glowPulseDay 5s ease-in-out infinite; }
+body.night .timer-card { animation:glowPulseNight 6s ease-in-out infinite; }
+
+.timer-display {
+  text-align:center;font-family:'Hiragino Maru Gothic ProN','Yu Gothic',sans-serif;
+  font-size:44px;color:var(--accent);letter-spacing:.06em;line-height:1;padding:6px 0;
+}
+body.night .timer-display { text-shadow:0 0 26px rgba(200,150,90,.45); }
+
+.timer-label { text-align:center;font-size:11px;color:var(--muted);letter-spacing:.12em; }
+.timer-btns { display:flex;gap:8px; }
+.timer-btn {
+  flex:1;padding:8px;border-radius:10px;
+  border:1px solid var(--border2);background:var(--surface2);
+  font-family:'Hiragino Maru Gothic ProN','Yu Gothic',sans-serif;font-size:13px;color:var(--muted);
+  cursor:pointer;transition:all .2s;
+}
+.timer-btn:hover { border-color:var(--accent2);color:var(--accent); }
+.timer-btn.primary {
+  background:var(--accent2);border-color:var(--accent2);
+  color:var(--bg);font-weight:700;
+}
+body.night .timer-btn.primary { color:#0f0e14; }
+body.morning .timer-btn.primary, body.afternoon .timer-btn.primary { color:#fff8ee; }
+.timer-btn.primary:hover { filter:brightness(1.15); }
+
+.progress-area { display:flex;flex-direction:column;gap:6px; }
+.progress-header { display:flex;justify-content:space-between;font-size:12px;color:var(--muted); }
+.progress-bar-bg { background:var(--surface2);border-radius:8px;height:5px;overflow:hidden; }
+.progress-bar-fill {
+  height:100%;background:linear-gradient(to right,var(--green),var(--teal));
+  border-radius:8px;transition:width .6s;
+}
+
+.section-label { font-size:11px;font-weight:700;color:var(--muted);letter-spacing:.12em;display:flex;align-items:center;gap:5px;text-transform:uppercase; }
+.add-task-row { display:flex;gap:8px; }
+.add-task-input {
+  flex:1;background:var(--surface2);border:1px solid var(--border2);
+  border-radius:12px;padding:10px 14px;
+  font-family:'Hiragino Maru Gothic ProN','Yu Gothic',sans-serif;font-size:16px;color:var(--text);
+  outline:none;transition:border-color .2s,box-shadow .2s;
+}
+.add-task-input:focus { border-color:var(--accent2);box-shadow:0 0 0 3px var(--accent-glow); }
+.add-task-input::placeholder { color:var(--muted2); }
+.add-btn {
+  background:var(--accent2);color:var(--bg);border:none;border-radius:12px;
+  padding:10px 18px;font-family:'Hiragino Maru Gothic ProN','Yu Gothic',sans-serif;font-size:16px;font-weight:700;
+  cursor:pointer;transition:filter .2s,transform .1s;white-space:nowrap;
+}
+body.morning .add-btn, body.afternoon .add-btn { color:#fff8ee; }
+body.night .add-btn { color:#0f0e14; }
+.add-btn:hover { filter:brightness(1.15); }
+.add-btn:active { transform:scale(.97); }
+
+.task-list { display:flex;flex-direction:column;gap:7px;max-height:320px;overflow-y:auto; }
+.task-list::-webkit-scrollbar { width:3px; }
+.task-list::-webkit-scrollbar-thumb { background:var(--border2);border-radius:3px; }
+
+@keyframes slideIn { from{opacity:0;transform:translateY(-6px);}to{opacity:1;transform:translateY(0);} }
+
+.task-item {
+  background:var(--surface);border:1px solid var(--border);
+  border-radius:12px;padding:11px 13px;display:flex;align-items:center;gap:10px;
+  animation:slideIn .3s ease;
+}
+.task-item:hover { border-color:var(--border2);background:var(--surface2); }
+.task-item.done { opacity:.4; }
+.task-checkbox {
+  width:19px;height:19px;border-radius:5px;border:1.5px solid var(--border2);
+  background:transparent;cursor:pointer;display:flex;align-items:center;justify-content:center;
+  flex-shrink:0;font-size:11px;
+}
+.task-checkbox.checked { background:var(--green);border-color:var(--green);color:var(--bg); }
+.task-text { flex:1;font-size:14px;line-height:1.5;cursor:pointer; }
+.task-item.done .task-text { text-decoration:line-through;color:var(--muted2); }
+.task-delete { background:none;border:none;cursor:pointer;color:var(--muted2);font-size:15px;padding:2px 4px;border-radius:5px;line-height:1; }
+.task-delete:hover { color:var(--rose); }
+.empty-state {
+  text-align:center;color:var(--muted);font-size:13px;padding:22px;
+  background:var(--surface);border:1px dashed var(--border2);border-radius:13px;line-height:2.2;
+}
+
+/* ── Chatroom ── */
+.chatroom {
+  grid-column:2;grid-row:3;
+  background:var(--surface);border:1px solid var(--border);
+  border-radius:18px;display:flex;flex-direction:column;
+  max-height:680px;position:sticky;top:22px;overflow:hidden;
+}
+.chat-header {
+  padding:12px 14px 10px;border-bottom:1px solid var(--border);
+  display:flex;align-items:center;gap:10px;flex-shrink:0;
+}
+.chat-header-title { font-size:13px;font-weight:700;color:var(--text);letter-spacing:.04em; }
+.chat-header-sub { font-size:11px;color:var(--muted);margin-top:1px; }
+.online-dots { display:flex;gap:4px;margin-left:auto; }
+.online-dot { width:8px;height:8px;border-radius:50%;animation:pulse 2.5s infinite; }
+.online-dot.haru { background:var(--accent); animation-delay:0s; }
+.online-dot.mia  { background:var(--green);  animation-delay:.4s; }
+.online-dot.sou  { background:var(--indigo); animation-delay:.8s; }
+
+.chat-members {
+  display:flex;flex-wrap:wrap;gap:5px;padding:8px 12px;
+  border-bottom:1px solid var(--border);flex-shrink:0;
+}
+.member-chip {
+  display:flex;align-items:center;gap:4px;cursor:pointer;
+  background:var(--surface2);border:1px solid var(--border2);
+  border-radius:20px;padding:3px 8px 3px 5px;font-size:11px;color:var(--text2);
+  transition:background .15s;
+}
+.member-chip:hover { background:var(--surface3); }
+.member-chip-dot { width:6px;height:6px;border-radius:50%; }
+.member-chip-loc { color:var(--muted);font-size:10px;margin-left:1px; }
+
+@keyframes fadeUp { from{opacity:0;transform:translateY(8px);}to{opacity:1;transform:translateY(0);} }
+@keyframes bounce { 0%,80%,100%{transform:translateY(0);}40%{transform:translateY(-5px);} }
+
+.chat-log {
+  flex:1;overflow-y:auto;padding:10px 10px 6px;
+  display:flex;flex-direction:column;gap:2px;scroll-behavior:smooth;
+}
+.chat-log::-webkit-scrollbar { width:3px; }
+.chat-log::-webkit-scrollbar-thumb { background:var(--border2);border-radius:3px; }
+
+.sys-msg {
+  text-align:center;font-size:10px;color:var(--muted2);
+  padding:4px 0 6px;letter-spacing:.04em;animation:fadeUp .4s ease;
+}
+.chat-row { display:flex;gap:7px;align-items:flex-end;animation:fadeUp .35s ease;padding:2px 0; }
+.chat-row.me { flex-direction:row-reverse; }
+
+.chat-avatar {
+  width:27px;height:27px;border-radius:50%;
+  display:flex;align-items:center;justify-content:center;
+  font-size:13px;flex-shrink:0;
+  background:var(--surface2);border:1.5px solid var(--border2);margin-bottom:2px;
+}
+.chat-row.haru .chat-avatar { border-color:var(--accent2); }
+.chat-row.mia  .chat-avatar { border-color:var(--green); }
+.chat-row.sou  .chat-avatar { border-color:var(--indigo); }
+
+.chat-bubble-wrap { display:flex;flex-direction:column;gap:2px;max-width:80%; }
+.chat-name { font-size:10px;color:var(--muted);margin-bottom:1px;padding-left:2px; }
+.chat-row.haru .chat-name { color:var(--accent); }
+.chat-row.mia  .chat-name { color:var(--green); }
+.chat-row.sou  .chat-name { color:var(--indigo); }
+
+.chat-bubble {
+  border-radius:14px;padding:7px 11px;font-size:13px;line-height:1.65;
+  color:var(--text);display:inline-block;word-break:break-word;
+}
+.chat-row.haru .chat-bubble { background:var(--surface2);border:1px solid var(--border2);border-bottom-left-radius:4px; }
+.chat-row.mia  .chat-bubble { background:var(--surface2);border:1px solid var(--border2);border-bottom-left-radius:4px; }
+.chat-row.sou  .chat-bubble { background:var(--surface2);border:1px solid var(--border2);border-bottom-left-radius:4px; }
+.chat-row.me   .chat-bubble { background:var(--surface3);border:1px solid var(--border2);border-bottom-right-radius:4px;border-bottom-left-radius:14px; }
+
+.bubble-ts { font-size:9px;color:var(--muted2);margin-top:2px;padding-left:2px; }
+.chat-row.me .bubble-ts { text-align:right; }
+
+.typing-row { display:flex;gap:7px;align-items:flex-end;padding:2px 0;opacity:.7; }
+.typing-bubble { background:var(--surface2);border:1px solid var(--border);border-radius:12px;padding:8px 12px;display:flex;gap:4px;align-items:center; }
+.dot { width:5px;height:5px;border-radius:50%;background:var(--muted2);animation:bounce 1.2s infinite; }
+.dot:nth-child(2){animation-delay:.2s;}.dot:nth-child(3){animation-delay:.4s;}
+
+.chat-input-area { padding:10px 12px;border-top:1px solid var(--border);display:flex;gap:8px;flex-shrink:0;align-items:center; }
+.chat-input {
+  flex:1;background:var(--surface2);border:1px solid var(--border2);
+  border-radius:20px;padding:8px 14px;
+  font-family:'Hiragino Maru Gothic ProN','Yu Gothic',sans-serif;font-size:16px;color:var(--text);
+  outline:none;transition:border-color .2s;
+}
+.chat-input:focus { border-color:var(--accent2); }
+.chat-input::placeholder { color:var(--muted2); }
+.chat-send-btn {
+  background:var(--accent2);color:var(--bg);border:none;border-radius:50%;
+  width:34px;height:34px;font-size:15px;cursor:pointer;flex-shrink:0;
+  display:flex;align-items:center;justify-content:center;transition:filter .2s,transform .1s;
+}
+body.morning .chat-send-btn, body.afternoon .chat-send-btn { color:#fff8ee; }
+body.night .chat-send-btn { color:#0f0e14; }
+.chat-send-btn:hover { filter:brightness(1.15); }
+.chat-send-btn:active { transform:scale(.93); }
+
+/* Toast */
+@keyframes toastSlide { from{opacity:0;transform:translateX(-50%) translateY(10px);}to{opacity:1;transform:translateX(-50%) translateY(0);} }
+.move-toast {
+  position:fixed;top:50%;left:50%;transform:translate(-50%,-50%) scale(0.9);
+  background:var(--surface2);border:1px solid var(--border2);
+  border-radius:16px;padding:12px 24px;font-size:13px;color:var(--text);
+  opacity:0;pointer-events:none;z-index:200;white-space:nowrap;
+  transition:opacity .25s, transform .25s;
+}
+.move-toast.show { opacity:1;animation:toastSlide .3s ease; }
+
+/* ── Order System ── */
+@keyframes deliverIn { from{opacity:0;transform:translateY(30px) scale(.8);}to{opacity:1;transform:translateY(0) scale(1);} }
+@keyframes deliverOut { from{opacity:1;transform:scale(1);}to{opacity:0;transform:scale(.7) translateY(-20px);} }
+@keyframes waiterWalk { 0%{transform:translateX(110vw);} 100%{transform:translateX(-20vw);} }
+@keyframes trayBounce { 0%,100%{transform:translateY(0);}50%{transform:translateY(-4px);} }
+@keyframes itemPop { 0%{transform:scale(0) rotate(-20deg);}70%{transform:scale(1.2);}100%{transform:scale(1);} }
+
+.order-btn {
+  width:34px;height:34px;border-radius:50%;
+  background:var(--surface2);border:1px solid var(--border2);
+  font-size:16px;cursor:pointer;flex-shrink:0;
+  display:flex;align-items:center;justify-content:center;
+  transition:all .2s;
+}
+.order-btn:hover { border-color:var(--accent2);background:var(--surface3);transform:scale(1.08); }
+.order-btn.active { background:var(--accent2);border-color:var(--accent2); }
+
+.order-menu {
+  display:none;flex-direction:column;
+  border-top:1px solid var(--border);
+  background:var(--surface);
+  max-height:260px;overflow:hidden;
+  flex-shrink:0;
+}
+.order-menu.open { display:flex; }
+.order-menu-header {
+  display:flex;align-items:center;justify-content:space-between;
+  padding:8px 12px 6px;font-size:12px;font-weight:700;
+  color:var(--muted);letter-spacing:.08em;
+}
+.order-close-btn {
+  background:none;border:none;cursor:pointer;
+  color:var(--muted2);font-size:13px;padding:2px 5px;border-radius:5px;
+}
+.order-close-btn:hover { color:var(--rose); }
+
+.order-categories {
+  display:flex;gap:6px;padding:0 12px 8px;overflow-x:auto;
+  scrollbar-width:none;flex-shrink:0;
+}
+.order-categories::-webkit-scrollbar { display:none; }
+.cat-btn {
+  white-space:nowrap;padding:4px 12px;border-radius:20px;
+  font-size:11px;font-family:'Hiragino Maru Gothic ProN','Yu Gothic',sans-serif;
+  border:1px solid var(--border2);background:var(--surface2);color:var(--muted);
+  cursor:pointer;transition:all .2s;
+}
+.cat-btn:hover { border-color:var(--accent2);color:var(--accent); }
+.cat-btn.active { background:var(--accent2);border-color:var(--accent2);color:var(--bg);font-weight:700; }
+body.morning .cat-btn.active, body.afternoon .cat-btn.active { color:#fff8ee; }
+body.night .cat-btn.active { color:#0f0e14; }
+
+.order-items {
+  display:grid;grid-template-columns:repeat(3,1fr);gap:6px;
+  padding:0 12px 10px;overflow-y:auto;
+  scrollbar-width:thin;scrollbar-color:var(--border2) transparent;
+}
+.order-items::-webkit-scrollbar { width:3px; }
+.order-items::-webkit-scrollbar-thumb { background:var(--border2);border-radius:3px; }
+
+.order-item-btn {
+  display:flex;flex-direction:column;align-items:center;gap:3px;
+  padding:8px 4px;border-radius:12px;
+  border:1px solid var(--border);background:var(--surface2);
+  cursor:pointer;transition:all .18s;
+  font-family:'Hiragino Maru Gothic ProN','Yu Gothic',sans-serif;
+}
+.order-item-btn:hover { border-color:var(--accent2);background:var(--surface3);transform:translateY(-1px); }
+.order-item-btn:active { transform:scale(.95); }
+.order-item-emoji { font-size:20px;line-height:1; }
+.order-item-name { font-size:10px;color:var(--text2);text-align:center;line-height:1.3; }
+.order-item-note { font-size:9px;color:var(--muted2);text-align:center; }
+
+/* Waiter walk animation */
+.waiter-overlay {
+  position:fixed;bottom:80px;left:0;right:0;
+  pointer-events:none;z-index:300;height:60px;
+  overflow:hidden;opacity:0;
+}
+.waiter-overlay.walking { opacity:1; }
+.waiter-tray {
+  position:absolute;bottom:0;
+  display:flex;align-items:flex-end;gap:4px;
+  animation: waiterWalk 3.5s linear forwards;
+}
+.waiter-emoji { font-size:28px;line-height:1; }
+.waiter-item { font-size:18px;line-height:1;animation:trayBounce .6s ease-in-out infinite; }
+
+/* Tray bar — items on your table */
+.tray-bar {
+  position:fixed;bottom:0;left:50%;transform:translateX(-50%);
+  display:flex;gap:6px;align-items:center;
+  padding:6px 12px;
+  background:var(--surface2);border:1px solid var(--border2);
+  border-bottom:none;border-radius:14px 14px 0 0;
+  font-size:11px;color:var(--muted);
+  z-index:250;transition:all .4s;
+  opacity:0;pointer-events:none;
+  max-width:90vw;flex-wrap:wrap;justify-content:center;
+}
+.tray-bar.has-items { opacity:1;pointer-events:auto; }
+.tray-item {
+  display:flex;align-items:center;gap:3px;
+  background:var(--surface);border:1px solid var(--border);
+  border-radius:20px;padding:3px 8px;font-size:12px;
+  animation:deliverIn .4s ease;cursor:pointer;transition:opacity .2s;
+}
+.tray-item:hover { opacity:.6; }
+.tray-label { font-size:10px;color:var(--muted2);margin-right:4px; }
+
+@media(max-width:720px){
+  .app { grid-template-columns:1fr; }
+  .chatroom { grid-column:1;grid-row:auto;position:static;max-height:460px; }
+  .floor-wrap { max-height:160px; }
+}
+
+/* ── NPC Profile Modal ── */
+.profile-overlay {
+  position:fixed;inset:0;z-index:500;
+  background:rgba(0,0,0,.45);backdrop-filter:blur(4px);
+  display:flex;align-items:center;justify-content:center;
+  opacity:0;pointer-events:none;transition:opacity .2s;
+}
+.profile-overlay.show { opacity:1;pointer-events:all; }
+.profile-card {
+  background:var(--surface);border:1px solid var(--border2);
+  border-radius:20px;padding:24px 22px;width:min(320px,88vw);
+  transform:scale(.92);transition:transform .2s;
+  box-shadow:0 8px 40px rgba(0,0,0,.3);
+}
+.profile-overlay.show .profile-card { transform:scale(1); }
+.profile-header {
+  display:flex;align-items:center;gap:12px;margin-bottom:14px;
+}
+.profile-emoji {
+  font-size:36px;width:56px;height:56px;
+  display:flex;align-items:center;justify-content:center;
+  background:var(--surface2);border-radius:50%;
+  border:2px solid var(--border2);flex-shrink:0;
+}
+.profile-name { font-size:18px;font-weight:700;color:var(--text); }
+.profile-job { font-size:11px;color:var(--muted);margin-top:2px; }
+.profile-desc {
+  font-size:12.5px;color:var(--text2);line-height:1.7;
+  white-space:pre-line;margin-bottom:14px;
+}
+.profile-favs { display:flex;flex-direction:column;gap:5px; }
+.profile-fav {
+  font-size:11.5px;color:var(--muted);
+  background:var(--surface2);border-radius:8px;padding:4px 10px;
+}
+.profile-close {
+  display:block;margin-top:16px;width:100%;
+  background:var(--surface2);border:1px solid var(--border2);
+  border-radius:10px;padding:8px;font-size:12px;color:var(--text2);
+  cursor:pointer;transition:background .15s;
+}
+.profile-close:hover { background:var(--surface3); }
+.chat-avatar { cursor:pointer; }
+.chat-avatar:hover { transform:scale(1.1); }
+
+</style>
+</head>
+<body>
+
+<div class="stars" id="stars"></div>
+<div class="night-sky"></div>
+<div class="sun-glow"></div>
+<div class="noon-glow"></div>
+
+<div class="app">
+
+  <!-- Header -->
+  <div class="header">
+    <div class="header-icon" id="header-icon">☕</div>
+    <div style="flex:1;min-width:0;max-width:fit-content;">
+      <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
+        <div class="header-title" id="header-title">カフェ作業</div>
+        <div class="hours-badge" id="hours-badge"></div>
+      </div>
+      <div class="header-sub" id="header-sub" style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">今日もここで作業しよう</div>
+    </div>
+    <div class="time-badge" id="clock" style="flex-shrink:0;">00:00</div>
+  </div>
+
+  <!-- Floor Map -->
+  <div class="music-ticker-wrap" id="music-ticker-wrap">
+      <div class="music-ticker" id="music-ticker"></div>
+    </div>
+    <div class="map-card">
+    <div class="map-top">
+      <div class="map-label">🗺 フロアマップ</div>
+      <div class="map-legend">
+        <div class="legend-item"><div class="legend-dot" id="leg-haru"></div>ハル</div>
+        <div class="legend-item"><div class="legend-dot" id="leg-mia"></div>ミア</div>
+        <div class="legend-item"><div class="legend-dot" id="leg-sou"></div>ソウ</div>
+        <div class="legend-item"><div class="legend-dot" style="background:#8866cc"></div>あなた</div>
+      </div>
+    </div>
+    <div class="floor-wrap" id="floor-wrap">
+      <svg class="floor-svg" id="floor-svg" viewBox="0 0 560 190" preserveAspectRatio="xMidYMid meet" xmlns="http://www.w3.org/2000/svg">
+        <!-- filled by JS per theme -->
+      </svg>
+      <div class="npc-token haru" id="token-haru">🧑‍💻<div class="tlabel">ハル</div></div>
+      <div class="npc-token mia"  id="token-mia" >🌿<div class="tlabel">ミア</div></div>
+      <div class="npc-token sou"  id="token-sou" >🎧<div class="tlabel">ソウ</div></div>
+      <div class="user-token"     id="token-user">✌️<div class="tlabel">あなた</div></div>
+    </div>
+    <div class="map-hint" id="map-hint">💺 席をクリックして座る</div>
+  </div>
+
+  <!-- Left col -->
+  <div class="left-col">
+    <div class="timer-card">
+      <div class="section-label">⏱ タイマー</div>
+      <div class="timer-label" id="timer-mode-label">作業中</div>
+      <div class="timer-display" id="timer-display">25:00</div>
+      <div class="timer-btns">
+        <button class="timer-btn primary" id="timer-toggle-btn" onclick="toggleTimer()">▶ スタート</button>
+        <button class="timer-btn" onclick="resetTimer()">↺ リセット</button>
+        <button class="timer-btn" onclick="switchMode()" id="break-btn">☕ 休憩</button>
+      </div>
+    </div>
+    <div class="progress-area">
+      <div class="progress-header"><span id="progress-label">今日の進捗</span><span id="progress-text">0 / 0 完了</span></div>
+      <div class="progress-bar-bg"><div class="progress-bar-fill" id="progress-bar" style="width:0%"></div></div>
+    </div>
+    <div class="section-label">📝 タスク</div>
+    <div class="add-task-row">
+      <input class="add-task-input" id="task-input" type="text" placeholder="やること… (Enterで追加)" onkeydown="if(event.key==='Enter')addTask()">
+      <button class="add-btn" onclick="addTask()">追加</button>
+    </div>
+    <div class="task-list" id="task-list">
+      <div class="empty-state" id="empty-state">タスクまだないよ ☁️<br><small style="color:var(--muted2)">上に入力して追加してみてね</small></div>
+    </div>
+  </div>
+
+  <!-- Chatroom -->
+  <div class="chatroom">
+    <div class="chat-header">
+      <div>
+        <div class="chat-header-title" id="chat-title">💬 カフェチャット</div>
+        <div class="chat-header-sub" id="chat-sub">みんなここにいる</div>
+      </div>
+      <div class="online-dots">
+        <div class="online-dot haru"></div>
+        <div class="online-dot mia"></div>
+        <div class="online-dot sou"></div>
+      </div>
+    </div>
+    <div class="chat-members" id="chat-members">
+      <div class="member-chip" onclick="showProfile('haru')"><div class="member-chip-dot" style="background:var(--accent)"></div>🧑‍💻 ハル<span class="member-chip-loc" id="loc-haru"></span></div>
+      <div class="member-chip" onclick="showProfile('mia')"><div class="member-chip-dot" style="background:var(--green)"></div>🌿 ミア<span class="member-chip-loc" id="loc-mia"></span></div>
+      <div class="member-chip" onclick="showProfile('sou')"><div class="member-chip-dot" style="background:var(--indigo)"></div>🎧 ソウ<span class="member-chip-loc" id="loc-sou"></span></div>
+      <div class="member-chip"><div class="member-chip-dot" style="background:#8866cc;animation:pulse 2s infinite;"></div>✌️ あなた<span class="member-chip-loc" id="loc-user">· まだ座ってない</span></div>
+    </div>
+    <div class="chat-log" id="chat-log">
+      <div class="sys-msg" id="welcome-msg">— カフェへようこそ ☕ —</div>
+    </div>
+
+    <!-- Order menu panel -->
+    <div class="order-menu" id="order-menu">
+      <div class="order-menu-header">
+        <span id="order-menu-title">☕ メニュー</span>
+        <button class="order-close-btn" onclick="toggleMenu()">✕</button>
+      </div>
+      <div class="order-categories" id="order-categories"></div>
+      <div class="order-items" id="order-items"></div>
+    </div>
+
+    <div class="chat-input-area">
+      <button class="order-btn" id="order-btn" onclick="toggleMenu()" title="注文する">🛎</button>
+      <input class="chat-input" id="chat-input" type="text" placeholder="メッセージを送る…" onkeydown="if(event.key==='Enter')sendUserMsg()">
+      <button class="chat-send-btn" onclick="sendUserMsg()">↑</button>
+    </div>
+  </div>
+
+</div>
+<div class="move-toast" id="move-toast"></div>
+
+<!-- Waiter delivery animation -->
+<div class="waiter-overlay" id="waiter-overlay">
+  <div class="waiter-tray" id="waiter-tray">
+    <div class="waiter-emoji">🧑‍🍳</div>
+    <div class="waiter-item" id="waiter-item">☕</div>
+  </div>
+</div>
+
+<!-- Tray (current orders on table) -->
+<div class="tray-bar" id="tray-bar"></div>
+
+<script>
+// ══ HELPERS ══
+function pad(n){return String(n).padStart(2,'0');}
+function getNow(){const d=new Date();return pad(d.getHours())+':'+pad(d.getMinutes());}
+function shuffle(a){return[...a].sort(()=>Math.random()-.5);}
+function rnd(a){return a[Math.floor(Math.random()*a.length)];}
+
+// ══ PERIOD ══
+function getPeriod(){
+  const h=new Date().getHours();
+  if(h>=5&&h<11)return'morning';
+  if(h>=11&&h<17)return'afternoon';
+  return'night';
+}
+let currentPeriod=null;
+
+const PM={
+  morning:{
+    icon:'🌅',title:'朝カフェ',hours:'5:00〜11:00',sub:'おはよう、今日もここから始めよう',
+    ct:'💬 朝のカフェチャット',cs:'おはよう〜みんないる',
+    sm:'— おはようございます ☀️ —',
+    bi:'☕',pl:'今日の進捗',tbl:'朝休憩 ☕',pb:'🌅 朝',
+    ff:'#faf6ef',fs:'#ddd0b8',tf:'#f0e8d8',ts:'#ccc0a0',cf:'#faf6ef',
+    cl:'カウンター ☕',dc:'☀️',
+  },
+  afternoon:{
+    icon:'☀️',title:'昼カフェ',hours:'11:00〜17:00',sub:'午後もここで、ゆっくり作業しよ',
+    ct:'💬 昼のカフェチャット',cs:'まったり作業中〜',
+    sm:'— こんにちは、いい天気だね 🌤 —',
+    bi:'🍵',pl:'今日の進捗',tbl:'休憩タイム 🍵',pb:'☀️ 昼',
+    ff:'#f7f2e8',fs:'#d4c8a8',tf:'#ede4d4',ts:'#c0b090',cf:'#f7f2e8',
+    cl:'カウンター 🍰',dc:'🌿',
+  },
+  night:{
+    icon:'🕯️',title:'深夜カフェ',hours:'17:00〜5:00',sub:'夜も、ここで作業していこう',
+    ct:'💬 深夜カフェチャット',cs:'みんなまだいる',
+    sm:'— 深夜カフェへようこそ 🕯️ —',
+    bi:'🌙',pl:'今夜の進捗',tbl:'休憩中 🌙',pb:'🌙 夜',
+    ff:'#17151f',fs:'#2e2a3d',tf:'#1e1b28',ts:'#3d3857',cf:'#17151f',
+    cl:'カウンター ☕',dc:'🕯',
+  },
+};
+
+
+// ══ MUSIC TICKER ══
+const SONGS={
+  morning:[
+    {title:'Morning Bossa',artist:'Café del Sol'},{title:'First Light',artist:'Hana Trio'},
+    {title:'Warm Coffee',artist:'J. Moreau'},{title:'Sunrise Waltz',artist:'Emi & the Keys'},
+    {title:'The Early Hour',artist:'Blue Note Quartet'},{title:'朝の光の中で',artist:'Tsuki Yama'},
+    {title:'Gentle Start',artist:'Lena Foss'},{title:'Dawn Patrol',artist:'Morning Brew Band'},
+    {title:'Slow Awakening',artist:'Le Café'},{title:'7am Groove',artist:'Mellow Mist'},
+    {title:'Cream & Sugar',artist:'The Breakfast Club'},{title:'Open Windows',artist:'Airi Sato'},
+    {title:'Good Morning Blues',artist:'Old Town Jazz'},{title:'Petit Matin',artist:'Duo Soleil'},
+  ],
+  afternoon:[
+    {title:'Lazy Afternoon',artist:'Café Paradiso'},{title:'Siesta Mode',artist:'Duo Noche'},
+    {title:'Afternoon Tea',artist:'The Earl Greys'},{title:'Golden Hour',artist:'Sora Matsui'},
+    {title:'Mild Bossa',artist:'Rio & Friends'},{title:'昼下がりのメロディ',artist:'Hiro Kawa'},
+    {title:'Cloudy Window',artist:'Paper & Rain'},{title:'2pm Daydream',artist:'Lune Bleue'},
+    {title:'Drifting',artist:'Calm Harbor'},{title:'Sunlight Through Glass',artist:'Trio Verde'},
+    {title:'Half Past Noon',artist:'The Slow Club'},{title:'Gentle Pulse',artist:'Nao Ikeda'},
+    {title:'Afternoon Haze',artist:'Café Cinéma'},{title:'Slow Burn',artist:'West End Quartet'},
+  ],
+  night:[
+    {title:'Midnight Bossa',artist:'Club Minuit'},{title:'Late Night Smoke',artist:'The Dark Keys'},
+    {title:'Neon Rain',artist:'City After Hours'},{title:'深夜のスケッチ',artist:'Yoru Nami'},
+    {title:'3am',artist:'Solo Piano'},{title:'Quiet Hours',artist:'Insomnia Jazz'},
+    {title:'Night Owl',artist:'Café Noir'},{title:'Blue Shadows',artist:'Eva & Strings'},
+    {title:'Après Minuit',artist:'Duo Lune'},{title:'夜明け前',artist:'Kazuki Abe'},
+    {title:'Sleepless',artist:'The Vinyl Room'},{title:'Last Train',artist:'Mist Quartet'},
+    {title:'Stargazer',artist:'Observatory Band'},{title:'Into the Dark',artist:'Sable & Co.'},
+  ],
+};
+const NOTE_ICONS=['♪','♫','🎵','🎶','🎸','🎹','🎺','🎻'];
+
+let _tickerX=0, _tickerRAF=null, _tickerW=0, _currentSong=null;
+function buildTicker(){
+  const ticker=document.getElementById('music-ticker');
+  if(!ticker)return;
+  // stop previous loop
+  if(_tickerRAF){cancelAnimationFrame(_tickerRAF);_tickerRAF=null;}
+  _tickerX=0;
+  ticker.style.transform='translateX(0)';
+
+  const pool=SONGS[currentPeriod];
+  const shuffled=[...pool].sort(()=>Math.random()-.5);
+  _currentSong=shuffled[0]; // first song = "now playing"
+  ticker.innerHTML='';
+  // render ONE set first to measure, then duplicate
+  shuffled.forEach(function(song){
+    ticker.appendChild(makeTickerItem(song));
+  });
+  // after paint: measure one set width, then duplicate and start scrolling
+  requestAnimationFrame(function(){
+    requestAnimationFrame(function(){
+      _tickerW=ticker.scrollWidth; // width of one full set
+      // duplicate so we always have content ahead
+      shuffled.forEach(function(song){
+        ticker.appendChild(makeTickerItem(song));
+      });
+      startTickerLoop();
+      rotateSong();
+    });
+  });
+}
+function makeTickerItem(song){
+  const item=document.createElement('span');
+  item.className='ticker-item';
+  const note=document.createElement('span');
+  note.className='ticker-note';
+  note.textContent=rnd(NOTE_ICONS);
+  const text=document.createElement('span');
+  text.textContent=song.title+' — '+song.artist;
+  const sep=document.createElement('span');
+  sep.className='ticker-sep';
+  sep.textContent='·';
+  item.appendChild(note);item.appendChild(text);item.appendChild(sep);
+  return item;
+}
+let _tickerLastT=null;
+function rotateSong(){
+  if(!SONGS[currentPeriod])return;
+  const pool=SONGS[currentPeriod];
+  _currentSong=pool[Math.floor(Math.random()*pool.length)];
+  setTimeout(rotateSong, 60000+Math.random()*120000);
+}
+function startTickerLoop(){
+  _tickerLastT=null;
+  function loop(t){
+    if(_tickerLastT===null)_tickerLastT=t;
+    const dt=(t-_tickerLastT)/1000;
+    _tickerLastT=t;
+    _tickerX-=30*dt; // 30px/s
+    if(_tickerW>0 && _tickerX<=-_tickerW) _tickerX+=_tickerW; // seamless reset
+    const ticker=document.getElementById('music-ticker');
+    if(ticker) ticker.style.transform='translateX('+_tickerX+'px)';
+    _tickerRAF=requestAnimationFrame(loop);
+  }
+  _tickerRAF=requestAnimationFrame(loop);
+}
+
+// ══ NPC DATA ══
+const NPCS={
+  haru:{id:'haru',emoji:'🧑‍💻',name:'ハル',cls:'haru',msgs:{
+    morning:{
+      greet:['おはよう！今日もここ？','あ、来た来た〜おはよー','早いね。コーヒーもう頼んだ？'],
+      task_added:['ふむ、「{t}」ね。朝からえらい','「{t}」か。今日中に終わりそう？','朝に決めておくのいいよね、{t}'],
+      task_done:['「{t}」完了！朝からいい調子じゃん','おー、{t}終わったんだ。強い','やった！{t}クリアだ'],
+      timer_start:['じゃ集中しよ。朝のポモドーロ最高','朝のこの時間、一番好きなんだよな','（コーヒー飲む）よし、いこ'],
+      timer_done:['お疲れ！休憩してよ','25分早かったな〜おつかれ','朝から集中力すごい。一回息抜いて'],
+      idle:['コーヒーの香りが好きなんだよな〜','今日なんか調子いい気がする','朝のここ、静かで作業はかどる','ちょっと眠いけど起きてきた','窓から朝日見えてきた','モーニングセット美味しかった'],
+      move:['ちょっとコーヒーおかわりしてくる','席変えようかな','日当たりいい席行ってみよ','気分転換に場所変えよ'],
+      talk_to_mia:['ミアさん朝から来てたんだ！','ミアさん今日も論文？','ミアさんそれモーニング？'],
+      talk_to_sou:['ソウさん朝から来てるとは','ソウさん昨日も遅かったでしょ笑','ソウさんコーヒー何杯目'],
+      reply_mia:['そうそう、朝は静かでいいよね','ほんとそれ〜','モーニングいいな〜','えらい！'],
+      reply_sou:['確かに','まあな〜','ソウさんらしい','それな笑'],
+      react_user:['おはよう！席決まったんだ','朝から来たんだ、えらい','一緒にやろ〜'],
+      move_comment:['席変えたんだ','あっちもいい席だよね','気分転換大事'],
+    },
+    afternoon:{
+      greet:['こんにちは〜。午後もここにいるんだ','あ、来た！午後もお疲れ〜','お昼過ぎてもここにいる人たち笑'],
+      task_added:['「{t}」ね。午後に終わらせよう','うんうん、「{t}」か','「{t}」、今日中にやりきれそう？'],
+      task_done:['「{t}」完了！いい調子じゃん','おつかれ、{t}終わったんだね','よし！{t}やり切った〜'],
+      timer_start:['午後も集中タイム、いこ','じゃ25分だけ頑張ろっか','眠い時間帯だけど一緒にやろ'],
+      timer_done:['お疲れ！午後の25分えらい','ちょっと伸びしよ〜','よく頑張った。コーヒーおかわりしよ'],
+      idle:['午後ってなんか眠くなるな〜','今日お昼何食べた？','ここのケーキ美味しいんだよね','窓から外見てたら曇ってきた','午後もまだまだやることある笑','コーヒー2杯目突入した'],
+      move:['ちょっと席変えてくる','コーヒーおかわりしてくる','やっぱり窓際がいいかも','気分転換に移動しよ'],
+      talk_to_mia:['ミアさんお昼食べた？','ミアさん論文どこまで進んだ？','ミアさん今日何時間ここにいる笑'],
+      talk_to_sou:['ソウさん、バグ解決した？','ソウさんコーヒー何杯目になるの笑','ソウさん今日ここ何時から？'],
+      reply_mia:['わかる〜','ほんとそれ笑','えらいえらい','それ美味しそう'],
+      reply_sou:['確かに笑','まあそうだね','ソウさんらしい','それな〜'],
+      react_user:['座ったんだ！一緒にやろ','いい席選んだね','お疲れ〜！'],
+      move_comment:['移動したんだ','そっちの席もいいね','気分転換大事だよね'],
+    },
+    night:{
+      greet:['…お、今日も夜に来たんだ','こんばんは。外、寒くなかった？','また会ったね。深夜のここが一番好きなんだよな'],
+      task_added:['ふむ、「{t}」ね。夜にやるやつだ','「{t}」か。集中できそう','夜の方がはかどるよね、{t}みたいなの'],
+      task_done:['「{t}」、終わったんだ。深夜に強いね','おつかれ。「{t}」クリアか','やったじゃん。「{t}」終わった〜'],
+      timer_start:['じゃ集中しよ。お互いに','夜のポモドーロ、いいね。俺もやる','（コーヒー口つける）集中集中'],
+      timer_done:['お疲れ。深夜の25分えらすぎ','夜中に頑張ったね。休憩しよ','タイマー終わったか。目休めて'],
+      idle:['（コーヒーが冷めてきた…）','外の道路、誰も歩いてないな','深夜作業、なんか落ち着くんだよな','夜ってなんか正直になれる気がする','このBGMずっとループしてるな','コーヒー3杯目だ'],
+      move:['ちょっと席変えてくる','コーヒーおかわりしてくる','やっぱり窓際の方がいいかも','気分転換に場所変えよ'],
+      talk_to_mia:['ミアさん、論文進んだ？','ミアさん眠そうだけど大丈夫？','ミアさん何飲んでる？'],
+      talk_to_sou:['ソウさん、バグ取れた？','ソウさんまた徹夜コース？','ソウさん何時まで居る？'],
+      reply_mia:['そうそう、静かで好き','ほんとそれ笑','論文がんばれ〜','お茶おいしそうだな'],
+      reply_sou:['確かに','まあな','ソウさんらしい','それな笑'],
+      react_user:['…来たか','席、決めたんだ','（軽く頷く）'],
+      move_comment:['席変えたんだ','そっちもいいな','気分転換？'],
+    },
+  }},
+  mia:{id:'mia',emoji:'🌿',name:'ミア',cls:'mia',msgs:{
+    morning:{
+      greet:['おはようございます〜！朝から来たんですね','あ、来てたんだ！モーニング食べた？','ふわ〜眠い…でもここの朝の空気好き'],
+      task_added:['「{t}」かあ。朝からやる気あるじゃないですか','え！「{t}」、朝にやるんだ〜','「{t}」一緒に頑張りましょ！'],
+      task_done:['わあ「{t}」できた！朝から最高！','えらい〜！「{t}」終わったじゃんですか','やった〜！「{t}」完了おめでとう'],
+      timer_start:['一緒に集中しよ！朝の時間大事にしなきゃ','朝のポモドーロか〜いいな、私もやる！','（コーヒー持ちながら）よし、いこ！'],
+      timer_done:['お疲れ様〜！朝から集中えらすぎ','少し休んでね。外の空気気持ちよさそう','25分間すごい！朝から調子いいじゃないですか'],
+      idle:['朝のここ、光が差し込んでて綺麗','コーヒーの匂いがして目が覚める感じする','今日の論文、朝のうちに進めたい','モーニングって頼むか毎回迷う笑','窓際の席って朝が一番いいよね','朝早く来ると静かでいいな〜'],
+      move:['ちょっとトイレいってきます〜','お茶おかわりしてくる！','窓際の席移ってみようかな〜','ちょっとストレッチしてくる'],
+      talk_to_haru:['ハルさんいつも朝から来てるんですか？','ハルさん今日も作業？','ハルさんコーヒー派ですよね'],
+      talk_to_sou:['ソウさん昨夜から居たりします？笑','ソウさんって朝も夜もここにいますよね','ソウさんおはようございます！'],
+      reply_haru:['ほんとそれ〜','ハルさんさすが！','えらいな〜','朝からいいですね'],
+      reply_sou:['ソウさんって朝でも無口ですね笑','えらい…私も見習わなきゃ','ありがとうございます！','そうなんですね〜'],
+      react_user:['おはよう〜！来てくれた！','一緒の時間帯だ〜うれしい','朝から作業仲間いた！'],
+      move_comment:['移動したんですね〜','そっちの席いいですよね','朝は席によって光が変わりますよね'],
+    },
+    afternoon:{
+      greet:['こんにちは〜。午後もここにいます笑','あ、来てたんだ！午後もお疲れ〜','ふわ〜眠い…午後ってこんなに眠くなるんだ'],
+      task_added:['「{t}」かあ。午後の作業えらい','「{t}」！今日中に終わらせよ','「{t}」、一緒に頑張りましょ〜'],
+      task_done:['わあ「{t}」できた！午後なのにすごい！','えらい〜！「{t}」終わったじゃん','やった〜！「{t}」完了おめでとう'],
+      timer_start:['私も頑張る！眠いけど！','午後のポモドーロ、いいね','（伸びをする）よし一緒にやろ'],
+      timer_done:['お疲れ様〜！眠い時間帯なのにえらい','休憩してね〜。ちょっと甘いもの食べたい','25分集中したね！えらいえらい'],
+      idle:['午後眠い〜なんで眠くなるんだろ','ここのケーキ食べたくなってきた','論文の進みが悪くて現実逃避してる笑','外の空気吸いたいな〜','ここにいると作業はかどる気がする','コーヒーかお茶か迷ってる'],
+      move:['トイレいってきます〜','お茶おかわりしてくる！','あっちの席の方が静かかな','カウンター行ってみよ'],
+      talk_to_haru:['ハルさん今日何時間ここにいます？','ハルさん今日のお昼何食べました？','ハルさん、午後も作業続けるんですね〜'],
+      talk_to_sou:['ソウさんいつも集中してますよね〜','ソウさん眠くならないんですか？','ソウさんてコーヒー何杯くらい飲むんですか笑'],
+      reply_haru:['わかります〜','ほんとそれ笑','えらいな〜','それ美味しそう'],
+      reply_sou:['ソウさんさすが','えらい…私も見習わなきゃ','そうなんですね〜','ありがとうございます！'],
+      react_user:['やった〜！一緒の場所だ','来てくれてうれしいな〜','一緒に頑張りましょ！'],
+      move_comment:['移動したんですね〜','そっちの席いいですよね','落ち着く場所みつかった？'],
+    },
+    night:{
+      greet:['こんばんは〜。今日も深夜作業？','あ、来てたんだ。ここ夜も居心地いいよね','ふわ〜眠い…でも来ちゃった'],
+      task_added:['「{t}」かあ。夜にやるの偉い','「{t}」！深夜にやるんだ…すごい','「{t}」、一緒に頑張ろ〜'],
+      task_done:['わあ「{t}」できた！深夜なのに！','えらい〜。「{t}」終わったじゃん','やった〜！「{t}」完了おめでとう'],
+      timer_start:['私も集中する…！眠いけど','ポモドーロか。深夜でもやるじゃん','（背筋伸ばす）よし、一緒に'],
+      timer_done:['お疲れ様〜！夜中なのにすごい','休憩してね。目、疲れてない？','深夜25分がんばったね〜えらい'],
+      idle:['眠いけどなんか眠れない夜ってある','さっきお茶おかわりしてきた〜','外、雨降り始めたかも','夜のカフェって時間止まってる感じ好き','論文全然進まなくて現実逃避してる','でもここいると落ち着く不思議'],
+      move:['トイレいってきます〜','お茶おかわりしてくる！','あっちの席の方が静かかな〜','カウンター行ってみよ'],
+      talk_to_haru:['ハルさん今何時間目ですか？','ハルさん最近何作ってるんですか〜','ハルさんってここ毎日きてますよね'],
+      talk_to_sou:['ソウさんいつも集中してますよね','ソウさん、眠くないんですか…？','ソウさんそのお茶何ですか'],
+      reply_haru:['ほんとそれ〜','ハルさんさすが！','えらいな〜','そうなんですよ〜'],
+      reply_sou:['ソウさんって朝でも無口ですね笑','えらい…私も見習わなきゃ','ありがとうございます！','そうなんですね〜'],
+      react_user:['やった〜！来てくれた！','一緒の空間だ〜うれしい','一緒に頑張りましょ！'],
+      move_comment:['移動したんですね〜','そっちの席いいですよね','落ち着く場所みつかった？'],
+    },
+  }},
+  sou:{id:'sou',emoji:'🎧',name:'ソウ',cls:'sou',msgs:{
+    morning:{
+      greet:['…おはよう','（ヘッドホン外して頷く）','朝から来てるとは思わなかった'],
+      task_added:['「{t}」か。朝向きのタスクだな','…「{t}」。いいじゃん','朝のうちに一個ずつ。それだけ'],
+      task_done:['「{t}」完了か。朝から順調だな','…えらい','その調子。次もできる'],
+      timer_start:['…集中しよ','（ヘッドホンつける）','俺もタイマーかけた'],
+      timer_done:['朝から頑張ったな。少し休め','目閉じてていいよ','朝の25分、大事にな'],
+      idle:['…（黙々と書いてる）','朝のカフェ静かでいいな','朝はコーヒーより水','バグ、一個消えた','開店直後が一番空いてる','朝日が眩しいな'],
+      move:['…席変える','（無言で立ち上がる）','ちょっと歩いてくる','…コーヒー'],
+      talk_to_haru:['ハルさん、朝から来てたんですか','…ハルさん、それ今日中に終わるやつ？','ハルさんコーヒー何杯目'],
+      talk_to_mia:['…ミアさん、眠そうだけど大丈夫？','ミアさんそのモーニング美味しそうですね','ミアさん、朝から来てたんですね'],
+      reply_haru:['…そうかもな','まあな','…同意','確かに'],
+      reply_mia:['…大丈夫','ミアさんも休憩しろよ','…うん','ありがとうございます'],
+      react_user:['…来たか','（軽く頷く）','朝からお疲れ'],
+      move_comment:['…移動か','（気づいてる）','そっちもいいな'],
+    },
+    afternoon:{
+      greet:['…こんにちは','（ヘッドホン外して頷く）','午後もいるんですね。お互いね'],
+      task_added:['「{t}」か。午後向きだな','…「{t}」。着実に','一個ずつ。それだけ'],
+      task_done:['「{t}」完了か。いい調子だよ','…えらい','その調子'],
+      timer_start:['…集中しよ','（ヘッドホンつける）','俺もタイマーかけた'],
+      timer_done:['終わったな。少し休め','目閉じてていいよ','午後の25分、価値あるよ'],
+      idle:['…（コード書いてる）','このカフェ午後は混むな','コーヒー2杯目突入','Wi-Fi今日調子いいな','ランチタイム終わったら席空いてきた','…眠くなってきたが粘る'],
+      move:['…席変える','（無言で立ち上がる）','ちょっと歩いてくる','…コーヒー'],
+      talk_to_haru:['ハルさん、今日ここ何時間目ですか','…ハルさんそれ難しそうなやつ？','ハルさん午後もコーヒー飲んでる'],
+      talk_to_mia:['…ミアさん、眠くなってきてません？','ミアさんのお茶美味しそうですね','ミアさん論文どこまで進んだ'],
+      reply_haru:['…そうかもな','まあな','…同意','確かに'],
+      reply_mia:['…大丈夫','休憩しろよ','…うん','なるほど'],
+      react_user:['…来たか','（軽く頷く）','席、決めたんだ'],
+      move_comment:['…移動か','（気づいてる）','そっちもいいな'],
+    },
+    night:{
+      greet:['…来たか','（ヘッドホン外して頷く）','深夜にいるとは思わなかった。お互いね'],
+      task_added:['「{t}」か。夜向きのタスクだな','…「{t}」。いいじゃん','一個ずつ。それだけ'],
+      task_done:['「{t}」完了か。順調だな','…えらい','その調子。次もできる'],
+      timer_start:['…集中しよ','（ヘッドホンつける）','俺もタイマーかけた'],
+      timer_done:['終わったな。少し休め','目閉じてていいよ','深夜の25分、価値あるよ'],
+      idle:['…（黙々と書いてる）','このカフェ夜の方が静かでいい','バグ、一個消えた','…雨か。足音聞こえる','コーヒー、もう三杯目だ','Wi-Fi今日調子いいな'],
+      move:['…席変える','（無言で立ち上がる）','ちょっと歩いてくる','…コーヒー'],
+      talk_to_haru:['ハルさん、コーヒー何杯目','…ハルさん、それ何のプロジェクト？','ハルさんまた夜更かしですか'],
+      talk_to_mia:['…ミアさん、眠そうだけど大丈夫？','ミアさんそのお茶なんですか','ミアさん、休憩したら'],
+      reply_haru:['…そうかもな','まあな','…同意','確かに'],
+      reply_mia:['…大丈夫','ミアさんは休憩しろよ','…うん','なるほど'],
+      react_user:['…来たか','（軽く頷く）','席、決めたんだ'],
+      move_comment:['…移動か','（気づいてる）','そっちもいいな'],
+    },
+  }},
+};
+function G(id,key){return NPCS[id].msgs[currentPeriod][key];}
+
+// ══ GUEST NPCS ══
+const GNPCS={
+  morning:{id:'nozomi',emoji:'🌸',name:'ノゾミ',bc:'#d4607a',ad:12000,msgs:{
+    arrive:['おはようございます〜！朝活きましたよ！','ふわ〜、6時起きはさすがにきつかった笑','朝のカフェって空いてて最高ですよね'],
+    idle:['今日は朝のうちに3タスク終わらせる予定','コーヒーとモーニングプレート頼んじゃった♪','朝活仲間がいてうれしい〜','日の出の時間帯ってなんか清々しいですよね'],
+    talk_haru:['ハルさんも朝活派ですか？','ハルさんって毎朝来てるんですか！'],
+    talk_mia:['ミアさんモーニング何頼みましたか？','ミアさん朝ここで会うとは！'],
+    talk_sou:['ソウさん…昨夜からいたりします？笑','ソウさんのヘッドホン格好いいですね'],
+    react_user:['朝から来たんですね！一緒に頑張りましょ','おはようございます〜！朝活仲間だ'],
+    leave:['もうこんな時間！仕事行かなきゃ〜','お昼前に上がります〜また明日！'],
+  }},
+  afternoon:{id:'ken',emoji:'💼',name:'ケン',bc:'#7090c0',ad:10000,msgs:{
+    arrive:['こんにちは〜。ランチ後に来ました','午後もここで仕事させてもらいます','リモートワーク中につきお邪魔します笑'],
+    idle:['MTG終わって一息ついてます','Slackの通知が止まらない…','午後の集中タイム大事にしたい','在宅より外の方が集中できる派です'],
+    talk_haru:['ハルさんもリモートワーク系ですか？','ハルさんここよく来るんですね〜'],
+    talk_mia:['ミアさん学生さんですか？','ミアさん集中してますね〜えらい'],
+    talk_sou:['ソウさんエンジニア系ですか？','ソウさんって毎日ここで仕事してるんですか'],
+    react_user:['こんにちは！午後も作業ですか','同じく午後組ですね〜'],
+    leave:['お先に失礼します〜夕方に退勤します','今日もお疲れ様でした〜！'],
+  }},
+  night:{id:'shio',emoji:'🌒',name:'シオ',bc:'#6a5a9a',ad:14000,msgs:{
+    arrive:['…また来てしまった','（静かに席につく）','夜のここが、いちばん落ち着く'],
+    idle:['…','窓の外、誰もいない','時間が溶けていく感じがする','深夜ってなんか別の世界みたい','…眠れない夜は来ることにしてる'],
+    talk_haru:['…ハルさんは、何を作ってるんですか','…コーヒー、美味しそうですね'],
+    talk_mia:['ミアさん…論文、大変そうですね','…ミアさん、頑張ってますね'],
+    talk_sou:['…ソウさん','（ソウと目が合って、軽く頷く）'],
+    react_user:['…来たんですね','（静かに会釈する）','夜のここ、いいですよね…'],
+    leave:['…そろそろ','（静かに立ち上がる）','また夜に'],
+  }},
+};
+const gs={active:false,id:null,spot:null,lt:null};
+function GN(){return GNPCS[currentPeriod];}
+
+// ══ FLOOR MAP ══
+const SPOTS={
+  tableA_L:{fx:14/560,fy:38/190,label:'テーブルA'},tableA_R:{fx:68/560,fy:38/190,label:'テーブルA'},
+  tableB_L:{fx:14/560,fy:120/190,label:'テーブルB'},tableB_R:{fx:68/560,fy:120/190,label:'テーブルB'},
+  tableC_T:{fx:189/560,fy:40/190,label:'テーブルC'},tableC_B:{fx:189/560,fy:108/190,label:'テーブルC'},
+  tableC_L:{fx:149/560,fy:74/190,label:'テーブルC'},tableC_R:{fx:229/560,fy:74/190,label:'テーブルC'},
+  tableD_T:{fx:332/560,fy:66/190,label:'テーブルD'},tableD_B:{fx:332/560,fy:130/190,label:'テーブルD'},
+  sofa1:{fx:30/560,fy:158/190,label:'ソファE'},sofa2:{fx:75/560,fy:158/190,label:'ソファE'},
+  cnt1:{fx:423/560,fy:47/190,label:'カウンター'},cnt2:{fx:459/560,fy:47/190,label:'カウンター'},
+  cnt3:{fx:495/560,fy:47/190,label:'カウンター'},cnt4:{fx:531/560,fy:47/190,label:'カウンター'},
+};
+const SK=Object.keys(SPOTS);
+const NS={haru:{spot:'tableA_L',moving:false},mia:{spot:'tableC_T',moving:false},sou:{spot:'cnt1',moving:false}};
+let userSpot=null;
+
+function drawFloor(){
+  const m=PM[currentPeriod];
+  const svg=document.getElementById('floor-svg');
+  const ns='http://www.w3.org/2000/svg';
+  function mk(tag,a,txt){
+    const el=document.createElementNS(ns,tag);
+    for(const k of Object.keys(a)) el.setAttribute(k,String(a[k]));
+    if(txt!=null) el.textContent=txt;
+    svg.appendChild(el);
+  }
+  while(svg.firstChild) svg.removeChild(svg.firstChild);
+  mk('rect',{x:2,y:2,width:556,height:186,rx:10,fill:m.ff,stroke:m.fs,'stroke-width':1.5});
+  mk('rect',{x:253,y:185,width:54,height:3,rx:1,fill:'#7878b0'});
+  mk('text',{x:280,y:184,'text-anchor':'middle','font-size':7,fill:'#7878b0'},'▼ 出口');
+  [[2,32,3,44],[2,108,3,44],[555,32,3,44],[555,108,3,44]].forEach(function(r){
+    mk('rect',{x:r[0],y:r[1],width:r[2],height:r[3],rx:1,fill:m.ts});
+  });
+  mk('rect',{x:390,y:5,width:158,height:34,rx:6,fill:m.tf,stroke:m.ts,'stroke-width':1});
+  mk('text',{x:469,y:26,'text-anchor':'middle','font-size':10,fill:m.ts},m.cl);
+  [405,423,441,459,477,495,513,531].forEach(function(cx){
+    mk('circle',{cx:cx,cy:47,r:7,fill:m.cf,stroke:m.ts,'stroke-width':1});
+  });
+  function tbl(x,y,w,h,label,lx,ly,chairs){
+    mk('rect',{x:x,y:y,width:w,height:h,rx:6,fill:m.tf,stroke:m.ts,'stroke-width':1});
+    mk('text',{x:lx,y:ly,'text-anchor':'middle','font-size':8,fill:m.ts},label);
+    mk('text',{x:lx,y:ly-12,'text-anchor':'middle','font-size':9},m.dc);
+    chairs.forEach(function(c){mk('circle',{cx:c[0],cy:c[1],r:8,fill:m.cf,stroke:m.ts,'stroke-width':1});});
+  }
+  tbl(14,22,54,32,'A',41,37,[[14,38],[68,38]]);
+  tbl(14,104,54,32,'B',41,119,[[14,120],[68,120]]);
+  tbl(155,46,68,56,'C',189,76,[[189,40],[189,108],[149,74],[229,74]]);
+  tbl(305,72,54,52,'D',332,100,[[332,66],[332,130]]);
+  mk('rect',{x:14,y:152,width:88,height:26,rx:5,fill:m.tf,stroke:m.ts,'stroke-width':1});
+  mk('rect',{x:14,y:143,width:13,height:35,rx:4,fill:m.tf,stroke:m.ts,'stroke-width':1});
+  mk('rect',{x:89,y:143,width:13,height:35,rx:4,fill:m.tf,stroke:m.ts,'stroke-width':1});
+  mk('text',{x:58,y:168,'text-anchor':'middle','font-size':8,fill:m.ts},'ソファ E');
+  mk('circle',{cx:540,cy:168,r:12,fill:m.tf,stroke:m.ts,'stroke-width':1});
+  mk('text',{x:540,y:173,'text-anchor':'middle','font-size':13},'🌿');
+  mk('circle',{cx:120,cy:168,r:10,fill:m.tf,stroke:m.ts,'stroke-width':1});
+  mk('text',{x:120,y:173,'text-anchor':'middle','font-size':11},'🌱');
+}
+
+// ══ TOKENS ══
+function mkEl(tag,cls,txt){const e=document.createElement(tag);if(cls)e.className=cls;if(txt!=null)e.textContent=txt;return e;}
+function placeToken(id,spotKey,animate){
+  const w=document.getElementById('floor-wrap');
+  const sp=SPOTS[spotKey];
+  const left=w.clientWidth*sp.fx-13,top=w.clientHeight*sp.fy-13;
+  const el=document.getElementById('token-'+id);
+  if(!el)return;
+  if(!animate){const p=el.style.transition;el.style.transition='none';el.style.left=left+'px';el.style.top=top+'px';requestAnimationFrame(function(){el.style.transition=p;});}
+  else{el.style.left=left+'px';el.style.top=top+'px';}
+}
+function placeUserToken(k){
+  const w=document.getElementById('floor-wrap'),sp=SPOTS[k],el=document.getElementById('token-user');
+  el.style.display='flex';
+  el.style.left=(w.clientWidth*sp.fx-14)+'px';el.style.top=(w.clientHeight*sp.fy-14)+'px';
+}
+function initTokens(){Object.keys(NS).forEach(function(id){placeToken(id,NS[id].spot,false);});buildHotspots();updateAllLocs();}
+window.addEventListener('resize',function(){
+  Object.keys(NS).forEach(function(id){placeToken(id,NS[id].spot,false);});
+  if(userSpot)placeUserToken(userSpot);
+  if(gs.active&&gs.spot)placeToken('guest',gs.spot,false);
+  buildHotspots();
+});
+function updateAllLocs(){
+  Object.keys(NS).forEach(function(id){
+    const el=document.getElementById('loc-'+id);if(el)el.textContent=' · '+SPOTS[NS[id].spot].label;
+  });
+  refreshHotspots();
+}
+function buildHotspots(){
+  const wrap=document.getElementById('floor-wrap');
+  wrap.querySelectorAll('.seat-hotspot').forEach(function(el){el.remove();});
+  const w=wrap.clientWidth,h=wrap.clientHeight;
+  Object.entries(SPOTS).forEach(function([key,sp]){
+    const d=document.createElement('div');d.className='seat-hotspot';d.dataset.spot=key;d.title=sp.label;
+    d.style.left=(w*sp.fx)+'px';d.style.top=(h*sp.fy)+'px';
+    d.addEventListener('click',function(){userChooseSeat(key);});
+    wrap.appendChild(d);
+  });
+  refreshHotspots();
+}
+function refreshHotspots(){
+  const wrap=document.getElementById('floor-wrap');
+  const occ=Object.values(NS).map(function(s){return s.spot;});
+  if(gs.active&&gs.spot)occ.push(gs.spot);
+  wrap.querySelectorAll('.seat-hotspot').forEach(function(d){
+    const k=d.dataset.spot;d.classList.remove('occupied-npc','user-here');
+    if(k===userSpot)d.classList.add('user-here');else if(occ.includes(k))d.classList.add('occupied-npc');
+  });
+}
+function userChooseSeat(key){
+  const occ=Object.values(NS).map(function(s){return s.spot;});
+  if(gs.active&&gs.spot)occ.push(gs.spot);
+  if(occ.includes(key)){showToast('そこはもう誰かが座ってるよ 🪑');return;}
+  const prev=userSpot;userSpot=key;placeUserToken(key);refreshHotspots();
+  const label=SPOTS[key].label;
+  const lu=document.getElementById('loc-user');if(lu)lu.textContent=' · '+label;
+  document.getElementById('map-hint').textContent='📍 '+label+' に座ってる（別の席をクリックで移動）';
+  if(!prev){addSysMsg('— あなたが '+label+' に座りました 🪑 —');const g=rnd(['haru','mia','sou']);setTimeout(function(){addChatMsg(g,rnd(G(g,'react_user')));},1200);}
+  else{addSysMsg('— あなたが '+label+' に移動しました 🚶 —');if(Math.random()<0.5){const c=rnd(['haru','mia','sou']);setTimeout(function(){addChatMsg(c,rnd(G(c,'move_comment')));},1500);}}
+}
+
+// ══ THEME ══
+function applyTheme(period,first){
+  if(currentPeriod===period&&!first)return;
+  currentPeriod=period;
+  const m=PM[period];
+  document.body.className=period;
+  document.getElementById('header-icon').textContent=m.icon;
+  const hb=document.getElementById('hours-badge');if(hb)hb.textContent=m.hours;
+  document.getElementById('header-title').textContent=m.title;
+  document.getElementById('header-sub').textContent=m.sub;
+  document.getElementById('chat-title').textContent=m.ct;
+  document.getElementById('chat-sub').textContent=m.cs;
+  document.getElementById('progress-label').textContent=m.pl;
+  document.getElementById('break-btn').textContent=m.bi+' 休憩';
+  document.getElementById('welcome-msg').textContent=m.sm;
+  drawFloor();
+  buildTicker();
+  updateMenuMeta();
+  // Create stars once, show/hide via CSS class on body
+  if(!document.getElementById('stars').children.length){
+    const c=document.getElementById('stars');
+    for(let i=0;i<120;i++){
+      const s=document.createElement('div'),sz=Math.random()*2+.5,op=Math.random()*.5+.2;
+      s.className='star';
+      s.style.cssText='width:'+sz+'px;height:'+sz+'px;top:'+(Math.random()*100)+'%;left:'+(Math.random()*100)+'%;--op:'+op+';animation:twinkle '+(2+Math.random()*5)+'s '+(Math.random()*5)+'s infinite;';
+      c.appendChild(s);
+    }
+  }
+  const cs=getComputedStyle(document.body);
+  document.getElementById('leg-haru').style.background=cs.getPropertyValue('--accent').trim();
+  document.getElementById('leg-mia').style.background=cs.getPropertyValue('--green').trim();
+  document.getElementById('leg-sou').style.background=cs.getPropertyValue('--indigo').trim();
+  if(!first){
+    addSysMsg(m.sm);
+    if(gs.active){clearTimeout(gs.lt);const t=document.getElementById('token-guest');if(t)t.style.display='none';const ch=document.getElementById('chip-guest');if(ch)ch.style.display='none';gs.active=false;gs.spot=null;}
+    setTimeout(function(){guestArrive();},GNPCS[period].ad);
+  }
+}
+
+// ══ CLOCK ══
+function updateClock(){
+  try{
+    const n=new Date();
+    document.getElementById('clock').textContent=pad(n.getHours())+':'+pad(n.getMinutes());
+    const p=getPeriod();if(p!==currentPeriod)applyTheme(p,false);
+  }catch(e){
+    // Show error visibly on page
+    const d=document.getElementById('clock');
+    if(d)d.textContent='ERR';
+    const b=document.createElement('div');
+    b.style.cssText='position:fixed;top:0;left:0;right:0;background:red;color:white;font-size:11px;z-index:9999;padding:4px;word-break:break-all;';
+    b.textContent='updateClock ERR: '+e.message+' | '+( e.stack||'').replace(/\n/g,' ').slice(0,200);
+    document.body.appendChild(b);
+    clearInterval(window._clockInt);
+  }
+}
+
+// ══ CHAT ══
+let typIds={};
+function addChatMsg(npcId,text,delay){
+  delay=delay||0;
+  let info;
+  if(npcId==='guest'){const g=GN();info={emoji:g.emoji,name:g.name,color:g.bc};}
+  else{const n=NPCS[npcId];const cols={haru:'var(--accent)',mia:'var(--green)',sou:'var(--indigo)'};info={emoji:n.emoji,name:n.name,color:cols[npcId]};}
+  const log=document.getElementById('chat-log');
+  const typId='typ-'+npcId+'-'+Date.now();
+  setTimeout(function(){
+    if(typIds[npcId])return;typIds[npcId]=typId;
+    const tr=mkEl('div','typing-row');tr.id=typId;
+    const ta=mkEl('div','chat-avatar');ta.textContent=info.emoji;ta.style.borderColor=info.color;
+    const tb=mkEl('div','typing-bubble');
+    for(let i=0;i<3;i++)tb.appendChild(mkEl('div','dot'));
+    tr.appendChild(ta);tr.appendChild(tb);log.appendChild(tr);log.scrollTop=log.scrollHeight;
+  },delay);
+  setTimeout(function(){
+    if(typIds[npcId]){const e=document.getElementById(typIds[npcId]);if(e)e.remove();delete typIds[npcId];}
+    const time=getNow();
+    const row=mkEl('div','chat-row');
+    const av=mkEl('div','chat-avatar');av.textContent=info.emoji;av.style.borderColor=info.color;
+    if(npcId!=='guest') av.onclick=function(){showProfile(npcId);};
+    const wrap=mkEl('div','chat-bubble-wrap');
+    const nm=mkEl('div','chat-name',info.name);nm.style.color=info.color;
+    const bub=mkEl('div','chat-bubble',text);
+    bub.style.cssText='background:var(--surface2);border:1px solid var(--border2);border-bottom-left-radius:4px;';
+    const ts=mkEl('div','bubble-ts',time);
+    wrap.appendChild(nm);wrap.appendChild(bub);wrap.appendChild(ts);
+    row.appendChild(av);row.appendChild(wrap);log.appendChild(row);log.scrollTop=log.scrollHeight;
+    const rows=log.querySelectorAll('.chat-row,.sys-msg');if(rows.length>60)rows[0].remove();
+  },delay+1100+Math.random()*700);
+}
+function addWaiterMsg(text){
+  const log=document.getElementById('chat-log'),time=getNow();
+  const row=mkEl('div','chat-row');
+  const av=mkEl('div','chat-avatar','🧑‍🍳');av.style.borderColor='var(--accent)';
+  const wrap=mkEl('div','chat-bubble-wrap');
+  const nm=mkEl('div','chat-name','店員さん');nm.style.color='var(--accent)';
+  const bub=mkEl('div','chat-bubble',text);bub.style.cssText='background:var(--surface2);border:1px solid var(--border2);border-bottom-left-radius:4px;';
+  const ts=mkEl('div','bubble-ts',time);
+  wrap.appendChild(nm);wrap.appendChild(bub);wrap.appendChild(ts);row.appendChild(av);row.appendChild(wrap);log.appendChild(row);log.scrollTop=log.scrollHeight;
+}
+function addSysMsg(text,delay){
+  delay=delay||0;
+  setTimeout(function(){const log=document.getElementById('chat-log');const el=mkEl('div','sys-msg',text);log.appendChild(el);log.scrollTop=log.scrollHeight;},delay);
+}
+function sendUserMsg(){
+  const inp=document.getElementById('chat-input'),text=inp.value.trim();if(!text)return;inp.value='';
+  const log=document.getElementById('chat-log'),time=getNow();
+  const row=mkEl('div','chat-row me');const wrap=mkEl('div','chat-bubble-wrap');
+  const bub=mkEl('div','chat-bubble',text);const ts=mkEl('div','bubble-ts',time+' · あなた');
+  wrap.appendChild(bub);wrap.appendChild(ts);row.appendChild(wrap);log.appendChild(row);log.scrollTop=log.scrollHeight;
+  const reacts={
+    morning:{haru:['それな〜','なるほどね','わかる','朝からいい話'],mia:['わかります〜！','えっそうなんですか！','うんうん！','すごい！'],sou:['…なるほど','そか','まあな']},
+    afternoon:{haru:['それな','なるほどね〜','ほんとそれ'],mia:['わかります〜！','うんうん','すごい！','笑笑'],sou:['…なるほど','そか','まあな','…うん']},
+    night:{haru:['それな','なるほどね〜','わかる気がする','ふむふむ'],mia:['わかります〜！','うんうん','笑笑'],sou:['…なるほど','そか','まあな','…うん']},
+  };
+  shuffle(['haru','mia','sou']).slice(0,1+Math.floor(Math.random()*2)).forEach(function(id,i){
+    setTimeout(function(){addChatMsg(id,rnd(reacts[currentPeriod][id]));},800+i*1400);
+  });
+}
+
+// ══ NPC MOVEMENT ══
+const MSYS={haru:['ハルが席を移動しました 🚶','ハルがふらっと立ち上がった'],mia:['ミアが席を移動しました 🚶','ミアがそっと席を立った'],sou:['ソウが席を移動しました 🚶','ソウが無言で立った']};
+function moveNpc(id){
+  if(NS[id].moving)return;NS[id].moving=true;
+  const occ=Object.values(NS).map(function(s){return s.spot;});
+  if(userSpot)occ.push(userSpot);if(gs.active&&gs.spot)occ.push(gs.spot);
+  const avail=SK.filter(function(k){return!occ.includes(k);});
+  if(!avail.length){NS[id].moving=false;return;}
+  const ns=rnd(avail);addChatMsg(id,rnd(G(id,'move')));
+  setTimeout(function(){
+    NS[id].spot=ns;placeToken(id,ns,true);
+    addSysMsg('— '+rnd(MSYS[id])+' → '+SPOTS[ns].label+' —');
+    showToast(NPCS[id].name+' が '+SPOTS[ns].label+' に移動しました');
+    updateAllLocs();refreshHotspots();setTimeout(function(){NS[id].moving=false;},2500);
+  },1600);
+}
+function scheduleMove(id){setTimeout(function(){moveNpc(id);scheduleMove(id);},45000+Math.random()*90000);}
+
+// ══ GUEST ══
+function guestArrive(){
+  const g=GN();if(gs.active)return;
+  const occ=Object.values(NS).map(function(s){return s.spot;});if(userSpot)occ.push(userSpot);
+  const avail=SK.filter(function(k){return!occ.includes(k);});if(!avail.length)return;
+  const spot=rnd(avail);gs.active=true;gs.id=g.id;gs.spot=spot;
+  const wrap=document.getElementById('floor-wrap');
+  let tok=document.getElementById('token-guest');
+  if(!tok){tok=document.createElement('div');tok.id='token-guest';tok.className='npc-token guest-token';wrap.appendChild(tok);}
+  tok.style.display='flex';tok.style.borderColor=g.bc;tok.textContent=g.emoji;
+  const lbl=mkEl('div','tlabel',g.name);tok.appendChild(lbl);
+  placeToken('guest',spot,false);
+  let chip=document.getElementById('chip-guest');
+  if(!chip){chip=mkEl('div','member-chip');chip.id='chip-guest';document.getElementById('chat-members').appendChild(chip);}
+  chip.style.display='flex';while(chip.firstChild)chip.removeChild(chip.firstChild);
+  const dot=mkEl('div','member-chip-dot');dot.style.cssText='background:'+g.bc+';animation:pulse 2s infinite';
+  const loc=mkEl('span','member-chip-loc',' · '+SPOTS[spot].label);loc.id='loc-guest';
+  chip.appendChild(dot);chip.appendChild(document.createTextNode(g.emoji+' '+g.name));chip.appendChild(loc);
+  chip.style.cursor='pointer';chip.onclick=function(){showProfile(g.id);};
+  refreshHotspots();
+  addSysMsg('— '+g.name+' が入店しました ✨ —');
+  setTimeout(function(){addChatMsg('guest',rnd(g.msgs.arrive));},1500);
+  gs.lt=setTimeout(function(){guestLeave();},(8+Math.random()*7)*60000);
+  scheduleGuestIdle();
+}
+function guestLeave(){
+  const g=GN();if(!gs.active)return;
+  addChatMsg('guest',rnd(g.msgs.leave));
+  setTimeout(function(){
+    addSysMsg('— '+g.name+' が退店しました 👋 —');
+    const t=document.getElementById('token-guest');if(t)t.style.display='none';
+    const ch=document.getElementById('chip-guest');if(ch)ch.style.display='none';
+    gs.active=false;gs.spot=null;refreshHotspots();
+    setTimeout(function(){guestArrive();},(5+Math.random()*7)*60000);
+  },2000);
+}
+function scheduleGuestIdle(){
+  if(!gs.active)return;
+  setTimeout(function(){
+    if(!gs.active)return;
+    const g=GN();
+    const gr={haru:['そうですね〜','ほんとそれ','なるほど'],mia:['ですよね〜！','うんうん','わかります！'],sou:['…そうですね','まあな','…うん']};
+    if(Math.random()<0.35){const t=rnd(['haru','mia','sou']);addChatMsg('guest',rnd(g.msgs['talk_'+t]));setTimeout(function(){addChatMsg(t,rnd(gr[t]));},2200+Math.random()*1200);}
+    else addChatMsg('guest',rnd(g.msgs.idle));
+    scheduleGuestIdle();
+  },22000+Math.random()*45000);
+}
+
+// ══ ORDER SYSTEM ══
+const MENU={
+  coffee:{label:'☕ コーヒー',items:[{emoji:'☕',name:'ブレンドコーヒー',note:'定番'},{emoji:'🍵',name:'アメリカーノ',note:'すっきり'},{emoji:'🥛',name:'カフェラテ',note:'まろやか'},{emoji:'🧋',name:'カプチーノ',note:'泡ふわふわ'},{emoji:'🍫',name:'カフェモカ',note:'甘め'},{emoji:'🧊',name:'アイスコーヒー',note:'冷たい'}]},
+  tea:{label:'🍵 お茶',items:[{emoji:'🍵',name:'緑茶',note:'ほっとする'},{emoji:'🫖',name:'アールグレイ',note:'香り豊か'},{emoji:'🌸',name:'桜ほうじ茶',note:'季節限定'},{emoji:'🍋',name:'レモンティー',note:'さっぱり'},{emoji:'🌿',name:'カモミール',note:'リラックス'},{emoji:'🧊',name:'アイスティー',note:'冷たい'}]},
+  food:{label:'🍞 フード',items:[{emoji:'🥐',name:'クロワッサン',note:'サクサク'},{emoji:'🍞',name:'トースト',note:'シンプル'},{emoji:'🥪',name:'サンドイッチ',note:'お昼に'},{emoji:'🥗',name:'シーザーサラダ',note:'さっぱり'},{emoji:'🍳',name:'モーニングセット',note:'朝限定'},{emoji:'🍜',name:'ランチパスタ',note:'昼限定'}]},
+  sweets:{label:'🍰 スイーツ',items:[{emoji:'🍰',name:'チーズケーキ',note:'ここの定番'},{emoji:'🍩',name:'ドーナツ',note:'甘い'},{emoji:'🧁',name:'カップケーキ',note:'かわいい'},{emoji:'🍪',name:'クッキー',note:'サクサク'},{emoji:'🍮',name:'プリン',note:'とろとろ'},{emoji:'🍫',name:'ガトーショコラ',note:'濃厚'}]},
+};
+const DM=['お待たせしました、{i}です 😊','{i}、こちらへどうぞ','はい、{i}をお持ちしました ☕','{i}です。ごゆっくりどうぞ','お待たせ〜！{i}だよ','{i}、熱いのでお気をけて'];
+const OR={haru:['あ、{i}頼んだんだ。いいな〜','{i}か。俺も頼もうかな','{i}、美味しそう'],mia:['わあ、{i}！美味しそう〜！','{i}いいですね〜！私も欲しくなってきた'],sou:['…{i}か','（チラ見する）','…いいな']};
+let trayItems=[],menuOpen=false,currentCat='coffee';
+function toggleMenu(){
+  menuOpen=!menuOpen;
+  const menu=document.getElementById('order-menu'),btn=document.getElementById('order-btn');
+  if(menuOpen){menu.classList.add('open');btn.classList.add('active');renderMenuCats();renderMenuItems(currentCat);}
+  else{menu.classList.remove('open');btn.classList.remove('active');}
+}
+function renderMenuCats(){
+  const el=document.getElementById('order-categories');while(el.firstChild)el.removeChild(el.firstChild);
+  Object.entries(MENU).forEach(function([key,cat]){
+    const btn=mkEl('button','cat-btn'+(key===currentCat?' active':''),cat.label);
+    btn.onclick=function(){currentCat=key;renderMenuItems(key);renderMenuCats();};
+    el.appendChild(btn);
+  });
+}
+function renderMenuItems(catKey){
+  const el=document.getElementById('order-items');while(el.firstChild)el.removeChild(el.firstChild);
+  MENU[catKey].items.forEach(function(item){
+    if(item.note==='朝限定'&&currentPeriod!=='morning')return;
+    if(item.note==='昼限定'&&currentPeriod!=='afternoon')return;
+    const btn=mkEl('button','order-item-btn');
+    btn.appendChild(mkEl('div','order-item-emoji',item.emoji));
+    btn.appendChild(mkEl('div','order-item-name',item.name));
+    btn.appendChild(mkEl('div','order-item-note',item.note));
+    btn.onclick=function(){placeOrder(item);};el.appendChild(btn);
+  });
+}
+function updateMenuMeta(){
+  const titles={morning:'☕ モーニングメニュー',afternoon:'☕ メニュー',night:'🕯️ 夜メニュー'};
+  const el=document.getElementById('order-menu-title');if(el)el.textContent=titles[currentPeriod]||'☕ メニュー';
+  if(menuOpen)renderMenuItems(currentCat);
+}
+function placeOrder(item){
+  toggleMenu();
+  if(!userSpot){addSysMsg('— 注文は席についてからどうぞ 🪑 —');showToast('先に席に座ってね 🪑');return;}
+  const log=document.getElementById('chat-log'),time=getNow();
+  const row=mkEl('div','chat-row me'),wrap=mkEl('div','chat-bubble-wrap');
+  const bub=mkEl('div','chat-bubble',item.emoji+' '+item.name+' をオーダーしました');
+  const ts=mkEl('div','bubble-ts',time+' · あなた');
+  wrap.appendChild(bub);wrap.appendChild(ts);row.appendChild(wrap);log.appendChild(row);log.scrollTop=log.scrollHeight;
+  addSysMsg('— 🛎 注文受付：'+item.name+' —');
+  setTimeout(function(){addWaiterMsg('はい、'+item.name+'のご注文ですね。少々お待ちください 😊');},800);
+  setTimeout(function(){waiterWalk(item);},2200);
+  if(Math.random()<0.65){const r=rnd(['haru','mia','sou']);setTimeout(function(){addChatMsg(r,rnd(OR[r]).replace('{i}',item.name));},3500+Math.random()*1500);}
+}
+function waiterWalk(item){
+  const ov=document.getElementById('waiter-overlay'),tr=document.getElementById('waiter-tray');
+  document.getElementById('waiter-item').textContent=item.emoji;
+  ov.classList.add('walking');tr.style.animation='none';
+  requestAnimationFrame(function(){tr.style.animation='waiterWalk 3.5s linear forwards';});
+  setTimeout(function(){ov.classList.remove('walking');deliverItem(item);},3600);
+}
+function deliverItem(item){
+  addWaiterMsg(rnd(DM).replace('{i}',item.name));
+  trayItems.push(item);renderTray();showToast(item.emoji+' '+item.name+' が届きました！');
+}
+function renderTray(){
+  const bar=document.getElementById('tray-bar');while(bar.firstChild)bar.removeChild(bar.firstChild);
+  if(!trayItems.length){bar.classList.remove('has-items');return;}
+  bar.classList.add('has-items');bar.appendChild(mkEl('span','tray-label','テーブル：'));
+  trayItems.forEach(function(item,i){
+    const el=mkEl('div','tray-item');el.title='クリックで片付ける';
+    el.appendChild(document.createTextNode(item.emoji+' '));
+    const sp=mkEl('span',null,item.name);sp.style.cssText='font-size:11px;color:var(--text2)';
+    el.appendChild(sp);el.onclick=function(){trayItems.splice(i,1);renderTray();};bar.appendChild(el);
+  });
+}
+
+// ══ TASKS ══
+let tasks=[];
+function addTask(){
+  const inp=document.getElementById('task-input'),text=inp.value.trim();if(!text)return;
+  tasks.push({id:Date.now(),text:text,done:false});inp.value='';renderTasks();
+  shuffle(['haru','mia','sou']).slice(0,1+Math.floor(Math.random()*2)).forEach(function(id,i){
+    setTimeout(function(){addChatMsg(id,rnd(G(id,'task_added')).replace('{t}',text));},800+i*1600);
+  });
+}
+function toggleTask(id){
+  const t=tasks.find(function(t){return t.id===id;});if(!t)return;t.done=!t.done;renderTasks();
+  if(t.done)shuffle(['haru','mia','sou']).slice(0,1+Math.floor(Math.random()*2)).forEach(function(id,i){
+    setTimeout(function(){addChatMsg(id,rnd(G(id,'task_done')).replace('{t}',t.text));},800+i*1400);
+  });
+}
+function deleteTask(id){tasks=tasks.filter(function(t){return t.id!==id;});renderTasks();}
+function renderTasks(){
+  const list=document.getElementById('task-list'),empty=document.getElementById('empty-state');
+  const done=tasks.filter(function(t){return t.done;}).length;
+  document.getElementById('progress-text').textContent=done+' / '+tasks.length+' 完了';
+  document.getElementById('progress-bar').style.width=(tasks.length?done/tasks.length*100:0)+'%';
+  if(!tasks.length){list.innerHTML='';list.appendChild(empty);empty.style.display='';return;}
+  empty.style.display='none';list.querySelectorAll('.task-item').forEach(function(el){el.remove();});
+  tasks.slice().reverse().forEach(function(task){
+    const div=mkEl('div','task-item'+(task.done?' done':''));
+    const cb=mkEl('div','task-checkbox'+(task.done?' checked':''),task.done?'✓':'');
+    cb.onclick=function(){toggleTask(task.id);};
+    const tx=mkEl('div','task-text',task.text);tx.onclick=function(){toggleTask(task.id);};
+    const dl=mkEl('button','task-delete','×');dl.onclick=function(){deleteTask(task.id);};
+    div.appendChild(cb);div.appendChild(tx);div.appendChild(dl);list.appendChild(div);
+  });
+}
+
+// ══ TIMER ══
+let timerRunning=false,timerSecs=25*60,isBreak=false,timerInt=null;
+function updateTimerDisplay(){document.getElementById('timer-display').textContent=pad(Math.floor(timerSecs/60))+':'+pad(timerSecs%60);}
+function toggleTimer(){
+  const btn=document.getElementById('timer-toggle-btn');
+  if(timerRunning){clearInterval(timerInt);timerRunning=false;btn.textContent='▶ スタート';}
+  else{
+    timerRunning=true;btn.textContent='⏸ 一時停止';
+    shuffle(['haru','mia','sou']).slice(0,2).forEach(function(id,i){setTimeout(function(){addChatMsg(id,rnd(G(id,'timer_start')));},i*1700);});
+    timerInt=setInterval(function(){
+      timerSecs--;updateTimerDisplay();
+      if(timerSecs<=0){
+        clearInterval(timerInt);timerRunning=false;btn.textContent='▶ スタート';
+        shuffle(['haru','mia','sou']).slice(0,2).forEach(function(id,i){setTimeout(function(){addChatMsg(id,rnd(G(id,'timer_done')));},i*1400);});
+        isBreak=!isBreak;timerSecs=isBreak?5*60:25*60;
+        document.getElementById('timer-mode-label').textContent=isBreak?PM[currentPeriod].tbl:'作業中';
+        updateTimerDisplay();
+      }
+    },1000);
+  }
+}
+function resetTimer(){clearInterval(timerInt);timerRunning=false;isBreak=false;timerSecs=25*60;document.getElementById('timer-toggle-btn').textContent='▶ スタート';document.getElementById('timer-mode-label').textContent='作業中';updateTimerDisplay();}
+function switchMode(){clearInterval(timerInt);timerRunning=false;isBreak=!isBreak;timerSecs=isBreak?5*60:25*60;document.getElementById('timer-toggle-btn').textContent='▶ スタート';document.getElementById('timer-mode-label').textContent=isBreak?PM[currentPeriod].tbl:'作業中';updateTimerDisplay();}
+
+// ══ TOAST ══
+let toastTmr=null;
+function showToast(msg){const t=document.getElementById('move-toast');t.textContent=msg;t.classList.add('show');clearTimeout(toastTmr);toastTmr=setTimeout(function(){t.classList.remove('show');},3000);}
+
+// ══ IDLE & CONVERSATIONS ══
+function scheduleIdle(id){
+  const delay=30000+Math.random()*60000;
+  setTimeout(function(){
+    aiIdle(id,function(msg){addChatMsg(id,msg);scheduleIdle(id);});
+  },delay);
+}
+const CP=[
+  {a:'haru',b:'mia',ak:'talk_to_mia',bk:'reply_haru'},{a:'mia',b:'haru',ak:'talk_to_haru',bk:'reply_mia'},
+  {a:'sou',b:'mia',ak:'talk_to_mia',bk:'reply_sou'},{a:'mia',b:'sou',ak:'talk_to_sou',bk:'reply_mia'},
+  {a:'haru',b:'sou',ak:'talk_to_sou',bk:'reply_haru'},{a:'sou',b:'haru',ak:'talk_to_haru',bk:'reply_sou'},
+];
+
+// ══ NPC PROFILES ══
+const NPC_PROFILES={
+  haru:{
+    name:'ハル',emoji:'🧑‍💻',color:'var(--accent)',
+    job:'フリーランスエンジニア',
+    desc:'Webアプリを作ったり、個人開発をしたり。\nカフェ作業が一番はかどるって気づいてから、ほぼ毎日ここにいる。\nコーヒーはブラック派。',
+    favorites:['☕ ブラックコーヒー','🎧 Lo-fi hip hop','🌅 朝の窓際席'],
+  },
+  mia:{
+    name:'ミア',emoji:'🌿',color:'var(--green)',
+    job:'大学院生（環境科学専攻）',
+    desc:'論文と格闘中。\n気分転換にカフェに来るつもりが、結局ここで一番集中できる。\nここのハーブティーが好きすぎて週4〜5来てる。',
+    favorites:['🍵 カモミールティー','📚 分厚い専門書','🌿 窓から見える木'],
+  },
+  sou:{
+    name:'ソウ',emoji:'🎧',color:'var(--indigo)',
+    job:'バックエンドエンジニア',
+    desc:'喋るのは得意じゃないけど、ここの空気は好き。\nヘッドホンしてると集中できる。\n気づいたら深夜になってることが多い。',
+    favorites:['☕ コーヒー（何杯でも）','🎧 ノイズキャンセリング','🌙 深夜の静けさ'],
+  },
+  nozomi:{
+    name:'ノゾミ',emoji:'🌸',color:'#d4607a',
+    job:'ヨガインストラクター',
+    desc:'朝活のためにここに来てる。\n6時起きして、ここで朝のルーティンをこなすのが最高に気持ちいい。\n朝限定メニューのモーニングセットが大好き。',
+    favorites:['🌅 朝の空気','🍳 モーニングセット','🌸 花のある席'],
+  },
+  ken:{
+    name:'ケン',emoji:'💼',color:'#7090c0',
+    job:'マーケティングマネージャー（フルリモート）',
+    desc:'MTGの合間にここで仕事してる。\nオフィスより集中できるし、コーヒーも美味しいので。\n夕方になると必ずケーキを注文する。',
+    favorites:['☕ カフェラテ','💻 外部モニター持参','🍰 afternoon cake'],
+  },
+  shio:{
+    name:'シオ',emoji:'🌒',color:'#6a5a9a',
+    job:'…（はっきりしない）',
+    desc:'眠れない夜に、ふらっと来る。\n何をしているのかはよくわからない。\nでも、ここにいると落ち着く。それだけ。',
+    favorites:['🌒 深夜の静寂','📖 文庫本','…'],
+  },
+};
+// ══ AI CONVERSATION ══
+const NPC_PERSONAS={
+  haru:'ハル（🧑‍💻）男性。プログラマー。フレンドリーでさりげなく気を遣う。タメ口。「〜じゃん」「〜だよな」「それな」など自然なカジュアル語尾。短めの返答。',
+  mia:'ミア（🌿）女性。大学院生。明るくておっちょこちょい。「〜ですね」「わかります〜！」など丁寧だけど砕けた語尾。感嘆符多め。',
+  sou:'ソウ（🎧）男性。無口なエンジニア。必要最低限しか言わない。「…」で始まることが多い。超短文。クールだが優しさが滲む。',
+  nozomi:'ノゾミ（🌸）女性。朝活好き。元気で前向き。「〜ですよ！」など明るい語尾。',
+  ken:'ケン（💼）男性。リモートワーク中。丁寧だが親しみやすい。',
+  shio:'シオ（🌒）深夜の常連。詩的でゆったり。短文。「…」多め。',
+};
+const PERIOD_CONTEXT={
+  morning:'朝（5〜11時）。コーヒーの香り、今日の予定、朝の清々しさ。',
+  afternoon:'昼〜夕方（11〜17時）。午後の眠気、ランチ、作業の進捗。',
+  night:'夜〜深夜（17〜5時）。静けさ、集中、夜にしか言えない話。',
+};
+
+function buildPrompt(npcId, situation){
+  const hour=new Date().getHours();
+  return NPC_PERSONAS[npcId]+'\n'+PERIOD_CONTEXT[currentPeriod]+'（'+hour+'時）\n\n'+situation+'\n\nルール：1〜2文以内。キャラクターの口調を守る。セリフだけ返す。説明・地の文不要。';
+}
+
+function callClaude(promptText, onSuccess, onFail){
+  fetch('https://api.anthropic.com/v1/messages',{
+    method:'POST',
+    headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({
+      model:'claude-sonnet-4-20250514',
+      max_tokens:100,
+      messages:[{role:'user',content:promptText}]
+    })
+  }).then(function(res){return res.json();})
+  .then(function(data){
+    const text=data.content&&data.content[0]&&data.content[0].text;
+    if(text&&text.trim()) onSuccess(text.trim());
+    else if(onFail) onFail();
+  }).catch(function(){if(onFail)onFail();});
+}
+
+function runConversation(npcA, npcB){
+  const topics={
+    morning:['今日やること決めた？','朝からここ来てるの珍しくない？','コーヒーもう頼んだ？','今日なんか調子よさそう'],
+    afternoon:['お昼なんか食べた？','午後眠くない？','作業はかどってる？','ここ最近どう'],
+    night:['もうこんな時間か','夜のここって落ち着くよね','今日どうだった？','最近何か変わったことあった？'],
+  };
+  // 30%の確率で今流れてる曲の話をする
+  let topic;
+  if(Math.random()<0.3 && _currentSong){
+    const musicTopics=[
+      'この曲いいね、「'+_currentSong.title+'」',
+      '今流れてる曲、'+_currentSong.artist+'だっけ？',
+      '「'+_currentSong.title+'」って知ってる？',
+      'このBGMいい感じだよね',
+      '今の曲、作業にぴったりじゃない？',
+    ];
+    topic=rnd(musicTopics);
+  } else {
+    topic=rnd(topics[currentPeriod]);
+  }
+  const nameB=NPC_PERSONAS[npcB].split('（')[0];
+  const nameA=NPC_PERSONAS[npcA].split('（')[0];
+
+  // ターン1: A が話しかける
+  const p1=buildPrompt(npcA, nameB+'に話しかけてください。テーマ：「'+topic+'」');
+  callClaude(p1, function(msgA){
+    addChatMsg(npcA, msgA);
+    // ターン2: B が返す
+    setTimeout(function(){
+      const p2=buildPrompt(npcB, nameA+'から「'+msgA+'」と言われた。自然に返す。');
+      callClaude(p2, function(msgB){
+        addChatMsg(npcB, msgB);
+        // 50%でもう1ターン
+        if(Math.random()<0.5){
+          setTimeout(function(){
+            const p3=buildPrompt(npcA, '会話の流れ：あなた「'+msgA+'」→相手「'+msgB+'」。一言返して会話を締める。');
+            callClaude(p3, function(msgA2){
+              addChatMsg(npcA, msgA2);
+            }, null);
+          }, 2500+Math.random()*2000);
+        }
+      }, function(){
+        // fallback
+        addChatMsg(npcB, rnd(G(npcB, 'reply_'+npcA)));
+      });
+    }, 2000+Math.random()*1500);
+  }, function(){
+    // fallback to static
+    const p=CP.find(function(c){return c.a===npcA&&c.b===npcB;})||rnd(CP);
+    addChatMsg(p.a, rnd(G(p.a, p.ak)));
+    setTimeout(function(){addChatMsg(p.b, rnd(G(p.b, p.bk)));}, 2400);
+  });
+}
+
+function aiIdle(npcId, onResult){
+  const useMusicTopic=Math.random()<0.2&&_currentSong;
+  const idleSituation=useMusicTopic
+    ? 'カフェでひとりごとを一言つぶやく。今「'+_currentSong.title+' — '+_currentSong.artist+'」という曲が流れている。曲に触れてもいいし触れなくてもいい。1文のみ。'
+    : 'カフェでひとりごとを一言つぶやく。1文のみ。';
+  const p=buildPrompt(npcId, idleSituation);
+  callClaude(p, onResult, function(){
+    onResult(rnd(G(npcId,'idle')));
+  });
+}
+
+function scheduleIdle(id){
+  setTimeout(function(){
+    aiIdle(id, function(msg){
+      addChatMsg(id, msg);
+      scheduleIdle(id);
+    });
+  }, 30000+Math.random()*60000);
+}
+
+function scheduleConv(){
+  setTimeout(function(){
+    const p=rnd(CP);
+    runConversation(p.a, p.b);
+    scheduleConv();
+  }, 40000+Math.random()*80000);
+}
+
+// ══ NPC PROFILE MODAL ══
+function showProfile(npcId){
+  const p=NPC_PROFILES[npcId];if(!p)return;
+  document.getElementById('profile-emoji').textContent=p.emoji;
+  document.getElementById('profile-emoji').style.borderColor=p.color;
+  document.getElementById('profile-name').textContent=p.name;
+  document.getElementById('profile-name').style.color=p.color;
+  document.getElementById('profile-job').textContent=p.job;
+  document.getElementById('profile-desc').textContent=p.desc;
+  const favs=document.getElementById('profile-favs');
+  favs.innerHTML='';
+  p.favorites.forEach(function(f){
+    const el=mkEl('div','profile-fav',f);favs.appendChild(el);
+  });
+  document.getElementById('profile-overlay').classList.add('show');
+}
+function closeProfile(e){
+  if(e&&e.target!==document.getElementById('profile-overlay'))return;
+  document.getElementById('profile-overlay').classList.remove('show');
+}
+
+// ══ INIT ══
+window.addEventListener('load',function(){
+  const p=getPeriod();applyTheme(p,true);initTokens();updateTimerDisplay();
+  setTimeout(function(){addChatMsg('haru',rnd(G('haru','greet')));},1200);
+  setTimeout(function(){addChatMsg('mia',rnd(G('mia','greet')));},4500);
+  setTimeout(function(){addChatMsg('sou',rnd(G('sou','greet')));},8000);
+  Object.keys(NPCS).forEach(function(id){scheduleIdle(id);scheduleMove(id);});
+  // make member chips clickable
+  Object.keys(NPCS).forEach(function(id){
+    const chip=document.getElementById('chip-'+id);
+    if(chip){chip.style.cursor='pointer';chip.onclick=function(){showProfile(id);};}
+  });
+  scheduleConv();
+  setTimeout(function(){guestArrive();},GNPCS[p].ad);
+});
+updateClock();
+setInterval(updateClock,30000);
+</script>
+
+<!-- NPC Profile Modal -->
+<div class="profile-overlay" id="profile-overlay" onclick="closeProfile(event)">
+  <div class="profile-card" id="profile-card">
+    <div class="profile-header">
+      <div class="profile-emoji" id="profile-emoji"></div>
+      <div>
+        <div class="profile-name" id="profile-name"></div>
+        <div class="profile-job" id="profile-job"></div>
+      </div>
+    </div>
+    <div class="profile-desc" id="profile-desc"></div>
+    <div class="profile-favs" id="profile-favs"></div>
+    <button class="profile-close" onclick="closeProfile()">閉じる</button>
+  </div>
+</div>
+
+</body>
+</html>
