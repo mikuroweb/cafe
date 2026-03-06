@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Lofi Cafe ☕</title>
+<title>カフェ作業 ☕</title>
 
 <style>
 /* ══════════════════════════════════════
@@ -116,11 +116,12 @@ body.afternoon .noon-glow { opacity:1; }
 
 /* ── Layout ── */
 .app {
-  max-width:720px; width:100%; margin:0 auto; padding:22px 16px;
+  max-width:720px; width:100%; margin:0 auto; padding:160px 16px 22px;
   display:flex; flex-direction:column;
   gap:16px; min-height:100vh;
   position:relative; z-index:1;
   box-sizing:border-box;
+  overflow-x:hidden;
 }
 
 /* ══ TRANSITIONS for all surfaces ══ */
@@ -204,6 +205,7 @@ body.afternoon .noon-glow { opacity:1; }
 .floor-wrap {
   position:relative; width:100%;
   height:0; padding-bottom:33.93%; /* 190/560 */
+  overflow:hidden;
 }
 .floor-wrap > * {
   position:absolute; top:0; left:0; width:100%; height:100%;
@@ -631,6 +633,67 @@ body.night .cat-btn.active { color:#0f0e14; }
 .chat-avatar { cursor:pointer; }
 .chat-avatar:hover { transform:scale(1.1); }
 
+
+
+.app-fixed {
+  flex-shrink:0;
+}
+.app-scroll {
+  flex:1;
+  overflow-y:auto;
+  overflow-x:hidden;
+  padding:0 16px 22px;
+  max-width:720px;
+  width:100%;
+  margin:0 auto;
+  box-sizing:border-box;
+}
+.app-scroll::-webkit-scrollbar { width:4px; }
+.app-scroll::-webkit-scrollbar-track { background:transparent; }
+.app-scroll::-webkit-scrollbar-thumb { background:var(--border); border-radius:2px; }
+
+
+/* ── Fixed header + ticker ── */
+.sticky-top {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 100;
+  background: var(--bg);
+  padding: 14px 16px 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  border-bottom: 1px solid var(--border);
+  transition: background var(--transition-speed), border-color var(--transition-speed);
+  max-width: 720px;
+  margin: 0 auto;
+}
+/* センタリングのためfixedをwrapする */
+.sticky-outer {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 100;
+  display: flex;
+  justify-content: center;
+  background: var(--bg);
+  border-bottom: 1px solid var(--border);
+  transition: background var(--transition-speed), border-color var(--transition-speed);
+}
+.sticky-top {
+  position: relative;
+  width: 100%;
+  max-width: 720px;
+  padding: 14px 16px 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  border-bottom: none;
+}
+
 </style>
 </head>
 <body>
@@ -640,9 +703,7 @@ body.night .cat-btn.active { color:#0f0e14; }
 <div class="sun-glow"></div>
 <div class="noon-glow"></div>
 
-<div class="app">
-
-  <!-- Header -->
+<div class="sticky-outer"><div class="sticky-top">
   <div class="header">
     <div class="header-icon" id="header-icon">☕</div>
     <div style="flex:1;min-width:0;max-width:fit-content;">
@@ -659,6 +720,9 @@ body.night .cat-btn.active { color:#0f0e14; }
   <div class="music-ticker-wrap" id="music-ticker-wrap">
       <div class="music-ticker" id="music-ticker"></div>
     </div>
+</div></div><!-- /sticky-outer -->
+
+<div class="app">
     <div class="map-card">
     <div class="map-top">
       <div class="map-label">🗺 フロアマップ</div>
@@ -681,32 +745,8 @@ body.night .cat-btn.active { color:#0f0e14; }
     <div class="map-hint" id="map-hint">💺 席をクリックして座る</div>
   </div>
 
-  <!-- Left col -->
-  <div class="left-col">
-    <div class="timer-card">
-      <div class="section-label">⏱ タイマー</div>
-      <div class="timer-label" id="timer-mode-label">作業中</div>
-      <div class="timer-display" id="timer-display">25:00</div>
-      <div class="timer-btns">
-        <button class="timer-btn primary" id="timer-toggle-btn" onclick="toggleTimer()">▶ スタート</button>
-        <button class="timer-btn" onclick="resetTimer()">↺ リセット</button>
-        <button class="timer-btn" onclick="switchMode()" id="break-btn">☕ 休憩</button>
-      </div>
-    </div>
-    <div class="progress-area">
-      <div class="progress-header"><span id="progress-label">今日の進捗</span><span id="progress-text">0 / 0 完了</span></div>
-      <div class="progress-bar-bg"><div class="progress-bar-fill" id="progress-bar" style="width:0%"></div></div>
-    </div>
-    <div class="section-label">📝 タスク</div>
-    <div class="add-task-row">
-      <input class="add-task-input" id="task-input" type="text" placeholder="やること… (Enterで追加)" onkeydown="if(event.key==='Enter')addTask()">
-      <button class="add-btn" onclick="addTask()">追加</button>
-    </div>
-    <div class="task-list" id="task-list">
-      <div class="empty-state" id="empty-state">タスクまだないよ ☁️<br><small style="color:var(--muted2)">上に入力して追加してみてね</small></div>
-    </div>
-  </div>
-
+  <!-- app-fixed: chatroom stays on top -->
+  <div class="app-fixed">
   <!-- Chatroom -->
   <div class="chatroom">
     <div class="chat-header">
@@ -757,6 +797,39 @@ body.night .cat-btn.active { color:#0f0e14; }
     <div class="waiter-item" id="waiter-item">☕</div>
   </div>
 </div>
+  </div>
+
+  <!-- app-scroll: timer + tasks scroll below -->
+  <div class="app-scroll">
+  <!-- Left col -->
+  <div class="left-col">
+    <div class="progress-area">
+      <div class="progress-header"><span id="progress-label">今日の進捗</span><span id="progress-text">0 / 0 完了</span></div>
+      <div class="progress-bar-bg"><div class="progress-bar-fill" id="progress-bar" style="width:0%"></div></div>
+    </div>
+    <div class="section-label">📝 タスク</div>
+    <div class="add-task-row">
+      <input class="add-task-input" id="task-input" type="text" placeholder="やること… (Enterで追加)" onkeydown="if(event.key==='Enter')addTask()">
+      <button class="add-btn" onclick="addTask()">追加</button>
+    </div>
+    <div class="task-list" id="task-list">
+      <div class="empty-state" id="empty-state">タスクまだないよ ☁️<br><small style="color:var(--muted2)">上に入力して追加してみてね</small></div>
+    </div>
+    <div class="timer-card">
+      <div class="section-label">⏱ タイマー</div>
+      <div class="timer-label" id="timer-mode-label">作業中</div>
+      <div class="timer-display" id="timer-display">25:00</div>
+      <div class="timer-btns">
+        <button class="timer-btn primary" id="timer-toggle-btn" onclick="toggleTimer()">▶ スタート</button>
+        <button class="timer-btn" onclick="resetTimer()">↺ リセット</button>
+        <button class="timer-btn" onclick="switchMode()" id="break-btn">☕ 休憩</button>
+      </div>
+    </div>
+        </div>
+  </div>
+
+  </div>
+
 
 <!-- Tray (current orders on table) -->
 <div class="tray-bar" id="tray-bar"></div>
@@ -1051,36 +1124,70 @@ function G(id,key){return NPCS[id].msgs[currentPeriod][key];}
 
 // ══ GUEST NPCS ══
 const GNPCS={
-  morning:{id:'nozomi',emoji:'🌸',name:'ノゾミ',bc:'#d4607a',ad:12000,msgs:{
-    arrive:['おはようございます〜！朝活きましたよ！','ふわ〜、6時起きはさすがにきつかった笑','朝のカフェって空いてて最高ですよね'],
-    idle:['今日は朝のうちに3タスク終わらせる予定','コーヒーとモーニングプレート頼んじゃった♪','朝活仲間がいてうれしい〜','日の出の時間帯ってなんか清々しいですよね'],
-    talk_haru:['ハルさんも朝活派ですか？','ハルさんって毎朝来てるんですか！'],
-    talk_mia:['ミアさんモーニング何頼みましたか？','ミアさん朝ここで会うとは！'],
-    talk_sou:['ソウさん…昨夜からいたりします？笑','ソウさんのヘッドホン格好いいですね'],
-    react_user:['朝から来たんですね！一緒に頑張りましょ','おはようございます〜！朝活仲間だ'],
-    leave:['もうこんな時間！仕事行かなきゃ〜','お昼前に上がります〜また明日！'],
-  }},
-  afternoon:{id:'ken',emoji:'💼',name:'ケン',bc:'#7090c0',ad:10000,msgs:{
-    arrive:['こんにちは〜。ランチ後に来ました','午後もここで仕事させてもらいます','リモートワーク中につきお邪魔します'],
-    idle:['MTG終わって一息ついてます','Slackの通知が止まらない…','午後の集中タイム大事にしたい','在宅より外の方が集中できる派です'],
-    talk_haru:['ハルさんもリモートワーク系ですか？','ハルさんここよく来るんですね〜'],
-    talk_mia:['ミアさん学生さんですか？','ミアさん集中してますね〜えらい'],
-    talk_sou:['ソウさんエンジニア系ですか？','ソウさんって毎日ここで仕事してるんですか'],
-    react_user:['こんにちは！午後も作業ですか','同じく午後組ですね〜'],
-    leave:['お先に失礼します〜夕方に退勤します','今日もお疲れ様でした〜！'],
-  }},
-  night:{id:'shio',emoji:'🌒',name:'シオ',bc:'#6a5a9a',ad:14000,msgs:{
-    arrive:['…また来てしまった','（静かに席につく）','夜のここが、いちばん落ち着く'],
-    idle:['…','窓の外、誰もいない','時間が溶けていく感じがする','深夜ってなんか別の世界みたい','…眠れない夜は来ることにしてる'],
-    talk_haru:['…ハルさんは、何を作ってるんですか','…コーヒー、美味しそうですね'],
-    talk_mia:['ミアさん…論文、大変そうですね','…ミアさん、頑張ってますね'],
-    talk_sou:['…ソウさん','（ソウと目が合って、軽く頷く）'],
-    react_user:['…来たんですね','（静かに会釈する）','夜のここ、いいですよね…'],
-    leave:['…そろそろ','（静かに立ち上がる）','また夜に'],
-  }},
-};
+  morning:[
+    {id:'nozomi',emoji:'🌸',name:'ノゾミ',bc:'#d4607a',ad:12000,msgs:{
+      arrive:['おはようございます〜！朝活きましたよ！','ふわ〜、6時起きはさすがにきつかった笑','朝のカフェって空いてて最高ですよね'],
+      idle:['今日は朝のうちに3タスク終わらせる予定','コーヒーとモーニングプレート頼んじゃった♪','朝活仲間がいてうれしい〜','日の出の時間帯ってなんか清々しいですよね'],
+      talk_haru:['ハルさんも朝活派ですか？','ハルさんって毎朝来てるんですか！'],
+      talk_mia:['ミアさんモーニング何頼みましたか？','ミアさん朝ここで会うとは！'],
+      talk_sou:['ソウさん…昨夜からいたりします？笑','ソウさんのヘッドホン格好いいですね'],
+      react_user:['朝から来たんですね！一緒に頑張りましょ','おはようございます〜！朝活仲間だ'],
+      leave:['もうこんな時間！仕事行かなきゃ〜','お昼前に上がります〜また明日！'],
+    }},
+    {id:'ao',emoji:'🎨',name:'アオ',bc:'#5a9a7a',ad:25000,msgs:{
+      arrive:['おはようございます。スケッチしに来ました','朝の光が好きで…ここで絵を描くんです','静かな朝、最高ですね'],
+      idle:['朝の光で色が全然違う…','スケッチ帳、もう3冊目になった','コーヒーの湯気もいいモチーフ','今日も描けそうな気がする'],
+      talk_haru:['ハルさん…何を作ってるんですか？','エンジニアって絵描きと似てると思う、構造が'],
+      talk_mia:['ミアさん論文…装丁とか考えたことありますか？','ミアさんのノート、きれいな文字ですね'],
+      talk_sou:['ソウさんのヘッドホン、描いていいですか','…ソウさんって、静止画みたいに動かないですね笑'],
+      react_user:['作業中ですか。邪魔しないようにしますね','朝の集中、大事にしましょうね'],
+      leave:['スケッチ、いくつか描けた。帰ります','また朝に来ます。お疲れ様でした'],
+    }},
+  ],
+  afternoon:[
+    {id:'ken',emoji:'💼',name:'ケン',bc:'#7090c0',ad:10000,msgs:{
+      arrive:['こんにちは〜。ランチ後に来ました','午後もここで仕事させてもらいます','リモートワーク中につきお邪魔します笑'],
+      idle:['MTG終わって一息ついてます','Slackの通知が止まらない…','午後の集中タイム大事にしたい','在宅より外の方が集中できる派です'],
+      talk_haru:['ハルさんもリモートワーク系ですか？','ハルさんここよく来るんですね〜'],
+      talk_mia:['ミアさん学生さんですか？','ミアさん集中してますね〜えらい'],
+      talk_sou:['ソウさんエンジニア系ですか？','ソウさんって毎日ここで仕事してるんですか'],
+      react_user:['こんにちは！午後も作業ですか','同じく午後組ですね〜'],
+      leave:['お先に失礼します〜夕方に退勤します','今日もお疲れ様でした〜！'],
+    }},
+    {id:'riko',emoji:'📸',name:'リコ',bc:'#c07840',ad:22000,msgs:{
+      arrive:['こんにちは〜！取材の合間に寄りました','ここ雰囲気よくて好きなんですよね','カフェ巡りしてて、ここ一番好きかも'],
+      idle:['写真撮っていいか迷ってる…','ここのラテアート撮りたい','SNS用の写真整理しなきゃ','午後の光、写真に向いてる'],
+      talk_haru:['ハルさんって作ったアプリ見せてもらえたりしますか？','エンジニアさんってかっこいいな〜'],
+      talk_mia:['ミアさん研究って面白そう！','環境科学ってどんなこと研究するんですか？'],
+      talk_sou:['ソウさん写真撮られるの得意ですか？','…ソウさんって絵になりますね'],
+      react_user:['あ、一緒に頑張りましょう！','午後も作業ですか〜えらい'],
+      leave:['次の取材行ってきます〜！','またここ来ます！いい場所だった'],
+    }},
+  ],
+  night:[
+    {id:'shio',emoji:'🌒',name:'シオ',bc:'#6a5a9a',ad:14000,msgs:{
+      arrive:['…また来てしまった','（静かに席につく）','夜のここが、いちばん落ち着く'],
+      idle:['…','窓の外、誰もいない','時間が溶けていく感じがする','深夜ってなんか別の世界みたい','…眠れない夜は来ることにしてる'],
+      talk_haru:['…ハルさんは、何を作ってるんですか','…コーヒー、美味しそうですね'],
+      talk_mia:['ミアさん…論文、大変そうですね','…ミアさん、頑張ってますね'],
+      talk_sou:['…ソウさん','（ソウと目が合って、軽く頷く）'],
+      react_user:['…来たんですね','（静かに会釈する）','夜のここ、いいですよね…'],
+      leave:['…そろそろ','（静かに立ち上がる）','また夜に'],
+    }},
+    {id:'jun',emoji:'🎸',name:'ジュン',bc:'#c06050',ad:28000,msgs:{
+      arrive:['よ、深夜枠の常連ですよ〜','ライブ終わりにいつも寄るんです','夜のここ、テンション上がる'],
+      idle:['次の曲のコード考えてる','深夜のカフェって創作意欲湧く','ライブの余韻がまだ残ってる','コーヒー飲みすぎてる気がする笑'],
+      talk_haru:['ハルさんってコード書くんですか、自分はギターのコード笑','ハルさん何か作ってるんですね、いいな〜'],
+      talk_mia:['ミアさん夜型なんですか？','論文と曲作り、なんか似てる気がする'],
+      talk_sou:['ソウさんってどんな音楽聴くんですか？','…ソウさんと音楽の話したい'],
+      react_user:['よ！夜組ですね〜','深夜の作業、捗りますよね'],
+      leave:['じゃあそろそろ帰ります〜！','また来ます。お疲れ様でした！'],
+    }},
+  ],
+}
 const gs={active:false,id:null,spot:null,lt:null};
-function GN(){return GNPCS[currentPeriod];}
+const gs2={active:false,id:null,spot:null,lt:null};
+function GN(idx){return (GNPCS[currentPeriod]||[])[idx===undefined?0:idx];}
 
 // ══ FLOOR MAP ══
 const SPOTS={
@@ -1107,37 +1214,83 @@ function drawFloor(){
     if(txt!=null) el.textContent=txt;
     svg.appendChild(el);
   }
-  while(svg.firstChild) svg.removeChild(svg.firstChild);
-  mk('rect',{x:2,y:2,width:556,height:186,rx:10,fill:m.ff,stroke:m.fs,'stroke-width':1.5});
-  mk('rect',{x:253,y:185,width:54,height:3,rx:1,fill:'#7878b0'});
-  mk('text',{x:280,y:184,'text-anchor':'middle','font-size':7,fill:'#7878b0'},'▼ 出口');
-  [[2,32,3,44],[2,108,3,44],[555,32,3,44],[555,108,3,44]].forEach(function(r){
-    mk('rect',{x:r[0],y:r[1],width:r[2],height:r[3],rx:1,fill:m.ts});
-  });
-  mk('rect',{x:390,y:5,width:158,height:34,rx:6,fill:m.tf,stroke:m.ts,'stroke-width':1});
-  mk('text',{x:469,y:26,'text-anchor':'middle','font-size':10,fill:m.ts},m.cl);
-  [405,423,441,459,477,495,513,531].forEach(function(cx){
-    mk('circle',{cx:cx,cy:47,r:7,fill:m.cf,stroke:m.ts,'stroke-width':1});
-  });
-  function tbl(x,y,w,h,label,lx,ly,chairs){
-    mk('rect',{x:x,y:y,width:w,height:h,rx:6,fill:m.tf,stroke:m.ts,'stroke-width':1});
-    // horizontal label centered in table
-    const cx=x+w/2, cy=y+h/2+3;
-    mk('text',{x:cx,y:cy,'text-anchor':'middle','dominant-baseline':'middle','font-size':9,fill:m.ts},m.dc+' '+label);
-    chairs.forEach(function(c){mk('circle',{cx:c[0],cy:c[1],r:8,fill:m.cf,stroke:m.ts,'stroke-width':1});});
+  function emoji(x,y,size,e){
+    mk('text',{x,y,'text-anchor':'middle','dominant-baseline':'middle','font-size':size},e);
   }
-  tbl(24,22,47,32,'A',47,37,[[24,38],[71,38]]);
-  tbl(24,104,80,32,'B',64,119,[[24,120],[104,120]]);
-  tbl(155,46,68,56,'C',189,76,[[189,40],[189,108],[149,74],[229,74]]);
-  tbl(305,72,54,52,'D',332,100,[[332,66],[332,130]]);
-  mk('rect',{x:24,y:152,width:80,height:26,rx:5,fill:m.tf,stroke:m.ts,'stroke-width':1});
+  while(svg.firstChild) svg.removeChild(svg.firstChild);
+
+  // ── フロア床（木目風のストライプ）──
+  mk('rect',{x:2,y:2,width:556,height:186,rx:10,fill:m.ff,stroke:m.fs,'stroke-width':1.5});
+  // 木目ライン
+  for(let i=0;i<8;i++){
+    mk('line',{x1:2,y1:26+i*24,x2:558,y2:26+i*24,stroke:m.fs,opacity:.35,'stroke-width':.5});
+  }
+
+  // ── 出口ドア（下辺）──
+  mk('rect',{x:248,y:178,width:64,height:10,rx:3,fill:m.tf,stroke:'#7878b0','stroke-width':1});
+  mk('text',{x:280,y:184,'text-anchor':'middle','font-size':7,fill:'#7878b0'},'▼ 出口');
+
+  // ── 壁の柱 ──
+  [[2,32,4,44],[2,108,4,44],[554,32,4,44],[554,108,4,44]].forEach(function(r){
+    mk('rect',{x:r[0],y:r[1],width:r[2],height:r[3],rx:2,fill:m.ts,opacity:.6});
+  });
+
+  // ── カウンター ──
+  mk('rect',{x:388,y:4,width:162,height:36,rx:7,fill:m.tf,stroke:m.ts,'stroke-width':1.2});
+  // カウンター天板の光沢
+  mk('rect',{x:390,y:5,width:158,height:8,rx:4,fill:'#ffffff',opacity:.15});
+  mk('text',{x:469,y:25,'text-anchor':'middle','font-size':10,fill:m.ts},m.cl);
+  // カウンタースツール
+  [405,423,441,459,477,495,513,531].forEach(function(cx){
+    mk('circle',{cx:cx,cy:50,r:7,fill:m.cf,stroke:m.ts,'stroke-width':1});
+    mk('line',{x1:cx,y1:43,x2:cx,y2:40,stroke:m.ts,'stroke-width':1,opacity:.5});
+  });
+
+  // ── テーブル描画関数 ──
+  function tbl(x,y,w,h,label,chairs){
+    // 机の影
+    mk('rect',{x:x+2,y:y+3,width:w,height:h,rx:7,fill:'#00000011'});
+    // 机本体
+    mk('rect',{x,y,width:w,height:h,rx:6,fill:m.tf,stroke:m.ts,'stroke-width':1.2});
+    // 天板光沢
+    mk('rect',{x:x+3,y:y+2,width:w-6,height:5,rx:3,fill:'#ffffff',opacity:.18});
+    const cx=x+w/2, cy=y+h/2;
+    mk('text',{x:cx,y:cy+1,'text-anchor':'middle','dominant-baseline':'middle','font-size':9,fill:m.ts},m.dc+' '+label);
+    // 椅子
+    chairs.forEach(function(c){
+      mk('circle',{cx:c[0],cy:c[1],r:8,fill:m.cf,stroke:m.ts,'stroke-width':1.1});
+      mk('circle',{cx:c[0],cy:c[1],r:4,fill:'#ffffff',opacity:.2});
+    });
+  }
+
+  tbl(24,22,47,32,'A',[[24,38],[71,38]]);
+  tbl(24,104,80,32,'B',[[24,120],[104,120]]);
+  tbl(155,46,68,56,'C',[[189,40],[189,108],[149,74],[229,74]]);
+  tbl(305,72,54,52,'D',[[332,66],[332,130]]);
+
+  // ── ソファE ──
+  // 影
+  mk('rect',{x:26,y:156,width:80,height:26,rx:6,fill:'#00000011'});
+  // 本体
+  mk('rect',{x:24,y:152,width:80,height:26,rx:5,fill:m.tf,stroke:m.ts,'stroke-width':1.2});
+  // クッション感
+  mk('rect',{x:27,y:154,width:34,height:20,rx:4,fill:'#ffffff',opacity:.12});
+  mk('rect',{x:63,y:154,width:34,height:20,rx:4,fill:'#ffffff',opacity:.12});
+  // アームレスト
   mk('rect',{x:24,y:143,width:10,height:35,rx:4,fill:m.tf,stroke:m.ts,'stroke-width':1});
   mk('rect',{x:94,y:143,width:10,height:35,rx:4,fill:m.tf,stroke:m.ts,'stroke-width':1});
-  mk('text',{x:64,y:168,'text-anchor':'middle','font-size':8,fill:m.ts},'ソファ E');
-  mk('circle',{cx:540,cy:168,r:12,fill:m.tf,stroke:m.ts,'stroke-width':1});
-  mk('text',{x:540,y:173,'text-anchor':'middle','font-size':13},'🌿');
-  mk('circle',{cx:120,cy:168,r:10,fill:m.tf,stroke:m.ts,'stroke-width':1});
-  mk('text',{x:120,y:173,'text-anchor':'middle','font-size':11},'🌱');
+  mk('text',{x:64,y:168,'text-anchor':'middle','dominant-baseline':'middle','font-size':8,fill:m.ts},'ソファ E');
+
+  // ── 飾り・小物 ──
+  // 右下 観葉植物（大）
+  mk('circle',{cx:540,cy:166,r:14,fill:'#2a6a40',opacity:.25});
+  emoji(540,170,16,'🌿');
+  // 左下 小植物
+  mk('circle',{cx:120,cy:168,r:11,fill:'#2a6a40',opacity:.2});
+  emoji(120,172,13,'🌱');
+  // カウンター上の小物
+  emoji(398,22,10,'☕');
+  emoji(556,22,9,'🫙');
 }
 
 // ══ TOKENS ══
@@ -1192,6 +1345,7 @@ function refreshHotspots(){
   const wrap=document.getElementById('floor-wrap');
   const occ=Object.values(NS).map(function(s){return s.spot;});
   if(gs.active&&gs.spot)occ.push(gs.spot);
+  if(gs2.active&&gs2.spot)occ.push(gs2.spot);
   wrap.querySelectorAll('.seat-hotspot').forEach(function(d){
     const k=d.dataset.spot;d.classList.remove('occupied-npc','user-here');
     if(k===userSpot)d.classList.add('user-here');else if(occ.includes(k))d.classList.add('occupied-npc');
@@ -1200,6 +1354,7 @@ function refreshHotspots(){
 function userChooseSeat(key){
   const occ=Object.values(NS).map(function(s){return s.spot;});
   if(gs.active&&gs.spot)occ.push(gs.spot);
+  if(gs2.active&&gs2.spot)occ.push(gs2.spot);
   if(occ.includes(key)){showToast('そこはもう誰かが座ってるよ 🪑');return;}
   const prev=userSpot;userSpot=key;placeUserToken(key);refreshHotspots();
   const label=SPOTS[key].label;
@@ -1243,8 +1398,10 @@ function applyTheme(period,first){
   document.getElementById('leg-sou').style.background=cs.getPropertyValue('--indigo').trim();
   if(!first){
     addSysMsg(m.sm);
-    if(gs.active){clearTimeout(gs.lt);const t=document.getElementById('token-guest');if(t)t.style.display='none';const ch=document.getElementById('chip-guest');if(ch)ch.style.display='none';gs.active=false;gs.spot=null;}
-    setTimeout(function(){guestArrive();},GNPCS[period].ad);
+    if(gs.active){clearTimeout(gs.lt);const t=document.getElementById('token-guest');if(t)t.style.display='none';const ch=document.getElementById('chip-guest');if(ch)ch.style.display='none';gs.active=false;gs.spot=null;
+    const t2=document.getElementById('token-guest2');if(t2)t2.style.display='none';const ch2=document.getElementById('chip-guest2');if(ch2)ch2.style.display='none';gs2.active=false;gs2.spot=null;}
+    if(GNPCS[period]&&GNPCS[period][0]) setTimeout(function(){guestArrive();},GNPCS[period][0].ad);
+    if(GNPCS[period]&&GNPCS[period][1]) setTimeout(function(){guestArrive2();},GNPCS[period][1].ad);
   }
 }
 
@@ -1276,7 +1433,8 @@ let typIds={};
 function addChatMsg(npcId,text,delay){
   delay=delay||0;
   let info;
-  if(npcId==='guest'){const g=GN();info={emoji:g.emoji,name:g.name,color:g.bc};}
+  if(npcId==='guest2'){const g=GN(1)||GN(0)||{};info={emoji:g.emoji||'👤',name:g.name||'?',color:g.bc||'#888',bc:g.bc||'#888'};}
+  else if(npcId==='guest'){const g=GN(0)||{};info={emoji:g.emoji||'👤',name:g.name,color:g.bc};}
   else{const n=NPCS[npcId];const cols={haru:'var(--accent)',mia:'var(--green)',sou:'var(--indigo)'};info={emoji:n.emoji,name:n.name,color:cols[npcId]};}
   const log=document.getElementById('chat-log');
   const typId='typ-'+npcId+'-'+Date.now();
@@ -1293,7 +1451,12 @@ function addChatMsg(npcId,text,delay){
     const time=getNow();
     const row=mkEl('div','chat-row');
     const av=mkEl('div','chat-avatar');av.textContent=info.emoji;av.style.borderColor=info.color;
-    if(npcId!=='guest') av.onclick=function(){showProfile(npcId);};
+    if(npcId==='guest'||npcId==='guest2'){
+      const gid=(npcId==='guest2'?GN(1):GN(0));
+      if(gid) av.onclick=function(){showProfile(gid.id);};
+    } else {
+      av.onclick=function(){showProfile(npcId);};
+    }
     const wrap=mkEl('div','chat-bubble-wrap');
     const nm=mkEl('div','chat-name',info.name);nm.style.color=info.color;
     const bub=mkEl('div','chat-bubble',text);
@@ -1354,7 +1517,7 @@ function scheduleMove(id){setTimeout(function(){moveNpc(id);scheduleMove(id);},4
 
 // ══ GUEST ══
 function guestArrive(){
-  const g=GN();if(gs.active)return;
+  const g=GN(0);if(!g||gs.active)return;
   const occ=Object.values(NS).map(function(s){return s.spot;});if(userSpot)occ.push(userSpot);
   const avail=SK.filter(function(k){return!occ.includes(k);});if(!avail.length)return;
   const spot=rnd(avail);gs.active=true;gs.id=g.id;gs.spot=spot;
@@ -1378,7 +1541,7 @@ function guestArrive(){
   scheduleGuestIdle();
 }
 function guestLeave(){
-  const g=GN();if(!gs.active)return;
+  const g=GN(0);if(!gs.active)return;
   addChatMsg('guest',rnd(g.msgs.leave));
   setTimeout(function(){
     addSysMsg('— '+g.name+' が退店しました 👋 —');
@@ -1388,15 +1551,26 @@ function guestLeave(){
     setTimeout(function(){guestArrive();},(5+Math.random()*7)*60000);
   },2000);
 }
-function scheduleGuestIdle(){
-  if(!gs.active)return;
+function guestLeave2(){
+  const g=GN(1);if(!gs2.active)return;
+  addChatMsg('guest2',rnd(g.msgs.leave));
   setTimeout(function(){
-    if(!gs.active)return;
-    const g=GN();
+    addSysMsg('— '+g.name+' が退店しました 👋 —');
+    const t=document.getElementById('token-guest2');if(t)t.style.display='none';
+    const ch=document.getElementById('chip-guest2');if(ch)ch.style.display='none';
+    gs2.active=false;gs2.spot=null;refreshHotspots();
+    setTimeout(function(){guestArrive2();},(5+Math.random()*7)*60000);
+  },2000);
+}
+function scheduleGuestIdle2(){
+  if(!gs2.active)return;
+  setTimeout(function(){
+    if(!gs2.active)return;
+    const g=GN(1);if(!g)return;
     const gr={haru:['そうですね〜','ほんとそれ','なるほど'],mia:['ですよね〜！','うんうん','わかります！'],sou:['…そうですね','まあな','…うん']};
-    if(Math.random()<0.35){const t=rnd(['haru','mia','sou']);addChatMsg('guest',rnd(g.msgs['talk_'+t]));setTimeout(function(){addChatMsg(t,rnd(gr[t]));},2200+Math.random()*1200);}
-    else addChatMsg('guest',rnd(g.msgs.idle));
-    scheduleGuestIdle();
+    if(Math.random()<0.35){const t=rnd(['haru','mia','sou']);addChatMsg('guest2',rnd(g.msgs['talk_'+t]));setTimeout(function(){addChatMsg(t,rnd(gr[t]));},2200+Math.random()*1200);}
+    else addChatMsg('guest2',rnd(g.msgs.idle));
+    scheduleGuestIdle2();
   },22000+Math.random()*45000);
 }
 
@@ -1409,6 +1583,57 @@ const MENU={
 };
 const DM=['お待たせしました、{i}です 😊','{i}、こちらへどうぞ','はい、{i}をお持ちしました ☕','{i}です。ごゆっくりどうぞ','お待たせ〜！{i}だよ','{i}、熱いのでお気をけて'];
 const OR={haru:['あ、{i}頼んだんだ。いいな〜','{i}か。俺も頼もうかな','{i}、美味しそう'],mia:['わあ、{i}！美味しそう〜！','{i}いいですね〜！私も欲しくなってきた'],sou:['…{i}か','（チラ見する）','…いいな']};
+function guestArrive2(){
+  const g=GN(1);if(!g||gs2.active)return;
+  const occ=Object.values(NS).map(function(s){return s.spot;});if(userSpot)occ.push(userSpot);if(gs.spot)occ.push(gs.spot);
+  const avail=SK.filter(function(k){return!occ.includes(k);});if(!avail.length)return;
+  const spot=rnd(avail);gs2.active=true;gs2.id=g.id;gs2.spot=spot;
+  const wrap=document.getElementById('floor-wrap');
+  let tok=document.getElementById('token-guest2');
+  if(!tok){tok=document.createElement('div');tok.id='token-guest2';tok.className='npc-token guest-token';wrap.appendChild(tok);}
+  tok.style.display='flex';tok.style.borderColor=g.bc;tok.textContent=g.emoji;
+  const lbl=mkEl('div','tlabel',g.name);tok.appendChild(lbl);
+  placeToken('guest2',spot,false);
+  let chip=document.getElementById('chip-guest2');
+  if(!chip){chip=mkEl('div','member-chip');chip.id='chip-guest2';document.getElementById('chat-members').appendChild(chip);}
+  chip.style.display='flex';while(chip.firstChild)chip.removeChild(chip.firstChild);
+  const dot=mkEl('div','member-chip-dot');dot.style.cssText='background:'+g.bc+';animation:pulse 2s infinite';
+  const loc=mkEl('span','member-chip-loc',' · '+SPOTS[spot].label);loc.id='loc-guest2';
+  chip.appendChild(dot);chip.appendChild(document.createTextNode(g.emoji+' '+g.name));chip.appendChild(loc);
+  chip.style.cursor='pointer';chip.onclick=function(){showProfile(g.id);};
+  refreshHotspots();
+  addSysMsg('— '+g.name+' が入店しました ✨ —');
+  setTimeout(function(){addChatMsg('guest2',rnd(g.msgs.arrive));},1500);
+  gs2.lt=setTimeout(function(){guestLeave2();},(8+Math.random()*7)*60000);
+  scheduleGuestIdle2();
+}
+function guestLeave(){
+  const g=GN(0);if(!gs.active)return;
+  addChatMsg('guest',rnd(g.msgs.leave));
+  setTimeout(function(){
+    addSysMsg('— '+g.name+' が退店しました 👋 —');
+    const t=document.getElementById('token-guest2');if(t)t.style.display='none';
+    const ch=document.getElementById('chip-guest2');if(ch)ch.style.display='none';
+    gs2.active=false;gs2.spot=null;refreshHotspots();
+    setTimeout(function(){guestArrive();},(5+Math.random()*7)*60000);
+  },2000);
+}
+function scheduleGuestIdle(){
+  if(!gs.active)return;
+  setTimeout(function(){
+    if(!gs.active)return;
+    const g=GN(0);if(!g)return;
+    const gr={haru:['そうですね〜','ほんとそれ','なるほど'],mia:['ですよね〜！','うんうん','わかります！'],sou:['…そうですね','まあな','…うん']};
+    if(Math.random()<0.35){const t=rnd(['haru','mia','sou']);addChatMsg('guest',rnd(g.msgs['talk_'+t]));setTimeout(function(){addChatMsg(t,rnd(gr[t]));},2200+Math.random()*1200);}
+    else addChatMsg('guest',rnd(g.msgs.idle));
+    scheduleGuestIdle();
+  },22000+Math.random()*45000);
+}
+
+// ══ ORDER SYSTEM ══
+
+
+
 let trayItems=[],menuOpen=false,currentCat='coffee';
 function toggleMenu(){
   menuOpen=!menuOpen;
@@ -1541,11 +1766,11 @@ function showToast(msg){const t=document.getElementById('move-toast');t.textCont
 // ══ IDLE & CONVERSATIONS ══
 const CONV_TOPICS={
   morning:[
-    {a:'haru',b:'mia',  msgA:'ミアさん今日も早いね〜',  msgB:'ふわ〜、4時起きはさすがにきつかった笑'},
+    {a:'haru',b:'mia',  msgA:'ミアさん今日も早いね〜',  msgB:'ふわ〜、6時起きはさすがにきつかった笑'},
     {a:'mia', b:'haru', msgA:'ハルくんコーヒーもう頼んだ？',msgB:'もちろん。2杯目だよ'},
     {a:'haru',b:'sou',  msgA:'ソウさん朝から来てるとは思わなかった',msgB:'…昨日から来てる'},
     {a:'sou', b:'mia',  msgA:'…今日何やるの',           msgB:'午前中は論文、午後はデータ整理ですね！'},
-    {a:'mia', b:'sou',  msgA:'ソウさんヘッドホン外して珍しい',msgB:'充電切れたから…orz'},
+    {a:'mia', b:'sou',  msgA:'ソウさんヘッドホン外して珍しい',msgB:'…充電切れた'},
     {a:'haru',b:'mia',  msgA:'朝のここ、静かでいいよな〜',msgB:'わかります〜！集中できるんですよね'},
     {a:'sou', b:'haru', msgA:'…今日の予定は',           msgB:'午前中にPR出して、あとはレビュー待ち'},
     {a:'mia', b:'haru', msgA:'この朝の空気、好きなんですよね',msgB:'それな。夜とまた違う感じがする'},
@@ -1554,7 +1779,7 @@ const CONV_TOPICS={
     {a:'haru',b:'mia',  msgA:'ミアさんお昼なんか食べた？',msgB:'ここのサンドイッチ食べました！美味しかった〜'},
     {a:'mia', b:'sou',  msgA:'午後眠くないですか？',     msgB:'…眠い'},
     {a:'sou', b:'haru', msgA:'…作業はかどってる？',      msgB:'まあまあかな。コード書いてたら止まらなくなった'},
-    {a:'haru',b:'sou',  msgA:'ソウさん今日何時間いるの', msgB:'…テクノ一択だろ、JK'},
+    {a:'haru',b:'sou',  msgA:'ソウさん今日何時間いるの', msgB:'…わからん'},
     {a:'mia', b:'haru', msgA:'ハルくん今日ずっとここにいる感じ？',msgB:'たぶんね〜夕方まではいると思う'},
     {a:'sou', b:'mia',  msgA:'…論文どう',               msgB:'もう少しで一章終わります！たぶん笑'},
     {a:'haru',b:'mia',  msgA:'午後のここ、ちょっと混んでくるよね',msgB:'そうなんですよね〜でも好きです'},
@@ -1574,19 +1799,19 @@ const CONV_TOPICS={
 
 const IDLE_MSGS={
   haru:{
-    morning:['コーヒーの香りが好きなんだよな〜','今日なんか調子いい気がする','朝のここ、静かで作業はかどる','ちょっとコーヒーおかわりしてくる','（キーボードをカタカタ）','（ソウさん大丈夫か？）','やっぱりコーヒーに限るよね'],
-    afternoon:['午後の眠気やばい…','集中してたら2時間経ってた','そろそろ休憩いれようかな','コード書くの楽しいな〜','（伸びをする）','デバックだとうまくいくよね','おやつどうしようかな'],
-    night:['深夜のここ、落ち着くな','今日もなかなかいい感じだった','もう少しだけやろう','夜のコーヒー、染みる','（画面を見つめる）','あ～さすがに眠くなってきたかも','（しょっぱいもの欲しいな）'],
+    morning:['コーヒーの香りが好きなんだよな〜','今日なんか調子いい気がする','朝のここ、静かで作業はかどる','ちょっとコーヒーおかわりしてくる','（キーボードをカタカタ）'],
+    afternoon:['午後の眠気やばい…','集中してたら2時間経ってた','そろそろ休憩いれようかな','コード書くの楽しいな〜','（伸びをする）'],
+    night:['深夜のここ、落ち着くな','今日もなかなかいい感じだった','もう少しだけやろう','夜のコーヒー、染みる','（画面を見つめる）'],
   },
   mia:{
-    morning:['朝のカフェって最高ですよね','今日は調子よさそうな気がする！','ハーブティーおいしい〜','論文…がんばろ','（ノートを広げる）','（インスタチェック中）','（ハーブティーで朝からとばすしかない）'],
-    afternoon:['午後もがんばります！','ちょっと眠くなってきたかも…','データ整理、地味だけど大事','おやつ食べたい気分笑','（ページをめくる）','（インスタ投稿中）','ちゃんと野菜も食べないとだ'],
-    night:['夜のカフェって雰囲気いいですよね〜','論文あと少しで一章終わる！','深夜テンション上がってきた笑','静かで集中できる〜','（コーヒーをすする）','（DM返信中）','（友達と夜パフェ食べ行きたいかも）'],
+    morning:['朝のカフェって最高ですよね','今日は調子よさそうな気がする！','ハーブティーおいしい〜','論文…がんばろ','（ノートを広げる）'],
+    afternoon:['午後もがんばります！','ちょっと眠くなってきたかも…','データ整理、地味だけど大事','おやつ食べたい気分笑','（ページをめくる）'],
+    night:['夜のカフェって雰囲気いいですよね〜','論文あと少しで一章終わる！','深夜テンション上がってきた笑','静かで集中できる〜','（コーヒーをすする）'],
   },
   sou:{
-    morning:['…','（ヘッドホンをつけ直す）','…眠い','…今日もここか','（コーヒーを飲む）','（画面を凝視している）','…完璧すぎる','…ん？完璧か？','（…もうこれ今日の作業終わるんじゃないか？）'],
-    afternoon:['…','（画面を見る）','…集中してた','…コーヒー切れた','（静かに作業している）','（画面を凝視している）','…？！！？！（バグ発見）','…！？（バグが勝手に改善された）','（…こんな作業終わるわけないだろ、JK）'],
-    night:['…','…zzz（深夜の静寂）','…いい時間だ','…帰れない','（キーを叩く音だけが響く）','…コーヒー効かない','…？？？？（深夜バッチが動いてない）','…あ～あ、エンジニアの辛いとこね、これ','（…テレビの録画予約してたっけ）'],
+    morning:['…','（ヘッドホンをつけ直す）','…眠い','…今日もここか','（コーヒーを飲む）'],
+    afternoon:['…','（画面を見る）','…集中してた','…コーヒー切れた','（静かに作業している）'],
+    night:['…','（深夜の静寂）','…いい時間だ','…帰れない','（キーを叩く音だけが響く）'],
   },
 };
 
@@ -1648,6 +1873,24 @@ const NPC_PROFILES={
     desc:'MTGの合間にここで仕事してる。\nオフィスより集中できるし、コーヒーも美味しいので。\n夕方になると必ずケーキを注文する。',
     favorites:['☕ カフェラテ','💻 外部モニター持参','🍰 afternoon cake'],
   },
+  ao:{
+    name:'アオ',emoji:'🎨',color:'#5a9a7a',
+    job:'イラストレーター',
+    desc:'朝の光が好きで、カフェでスケッチをするのが日課。\n静かな朝の時間に、一番いい絵が描ける気がする。\nスケッチ帳はもう何冊目かわからない。',
+    favorites:['🎨 朝のスケッチ','☕ カフェオレ','🌅 朝の光'],
+  },
+  riko:{
+    name:'リコ',emoji:'📸',color:'#c07840',
+    job:'フリーランスライター／フォトグラファー',
+    desc:'カフェ巡りが趣味で取材も兼ねてよく来る。\nここのラテアートをいつか撮りたいと思っている。\n午後の光が写真に一番向いてると思っている。',
+    favorites:['📸 午後の光','🍰 ケーキ','📝 取材ノート'],
+  },
+  jun:{
+    name:'ジュン',emoji:'🎸',color:'#c06050',
+    job:'ミュージシャン（バンドのギタリスト）',
+    desc:'ライブ終わりにここに来るのが習慣になった。\n深夜のカフェで次の曲のコードを考えるのが好き。\nコーヒーを飲みすぎることに定評がある。',
+    favorites:['🎸 ライブの余韻','☕ ブラックコーヒー','🌙 深夜の創作'],
+  },
   shio:{
     name:'シオ',emoji:'🌒',color:'#6a5a9a',
     job:'…（はっきりしない）',
@@ -1691,7 +1934,8 @@ window.addEventListener('load',function(){
     if(chip){chip.style.cursor='pointer';chip.onclick=function(){showProfile(id);};}
   });
   scheduleConv();
-  setTimeout(function(){guestArrive();},GNPCS[p].ad);
+  if(GNPCS[p]&&GNPCS[p][0]) setTimeout(function(){guestArrive();},GNPCS[p][0].ad);
+  if(GNPCS[p]&&GNPCS[p][1]) setTimeout(function(){guestArrive2();},GNPCS[p][1].ad);
 });
 updateClock();
 setInterval(updateClock,30000);
