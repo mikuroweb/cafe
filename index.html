@@ -1140,12 +1140,15 @@ function drawFloor(){
 function mkEl(tag,cls,txt){const e=document.createElement(tag);if(cls)e.className=cls;if(txt!=null)e.textContent=txt;return e;}
 function getSVGRect(){
   const wrap=document.getElementById('floor-wrap');
-  const ww=wrap.clientWidth, wh=wrap.clientHeight;
-  const vbW=560, vbH=190;
-  const scale=Math.min(ww/vbW, wh/vbH);
-  const rw=vbW*scale, rh=vbH*scale;
-  const ox=(ww-rw)/2, oy=(wh-rh)/2;
-  document.title='ww='+Math.round(ww)+' wh='+Math.round(wh)+' scale='+scale.toFixed(3)+' rw='+Math.round(rw)+' rh='+Math.round(rh)+' ox='+Math.round(ox)+' oy='+Math.round(oy);
+  const svg=document.getElementById('floor-svg');
+  // Use SVG's own getBBox via getScreenCTM if available, else fallback
+  // getBoundingClientRect gives rendered size relative to viewport
+  const wrapRect=wrap.getBoundingClientRect();
+  const svgRect=svg.getBoundingClientRect();
+  const ox=svgRect.left - wrapRect.left;
+  const oy=svgRect.top  - wrapRect.top;
+  const rw=svgRect.width;
+  const rh=svgRect.height;
   return {ox,oy,rw,rh};
 }
 function placeToken(id,spotKey,animate){
