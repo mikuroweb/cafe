@@ -63,6 +63,8 @@ body.night {
 
 * { box-sizing: border-box; margin: 0; padding: 0; }
 
+html, body { overflow-x: hidden; }
+
 body {
   font-family:'Hiragino Maru Gothic ProN','Yu Gothic',sans-serif;
   background: var(--bg);
@@ -114,12 +116,11 @@ body.afternoon .noon-glow { opacity:1; }
 
 /* ── Layout ── */
 .app {
-  max-width:720px; margin:0 auto; padding:22px 16px;
-  display:grid;
-  grid-template-columns: 1fr;
+  max-width:720px; width:100%; margin:0 auto; padding:22px 16px;
+  display:flex; flex-direction:column;
   gap:16px; min-height:100vh;
   position:relative; z-index:1;
-  align-items:start;
+  box-sizing:border-box;
 }
 
 /* ══ TRANSITIONS for all surfaces ══ */
@@ -133,7 +134,7 @@ body.afternoon .noon-glow { opacity:1; }
 
 /* ── Header ── */
 .header {
-  grid-column:1/-1; display:flex; align-items:center; justify-content:center; gap:10px;
+  display:flex; align-items:center; justify-content:center; gap:10px;
   padding-bottom:16px; border-bottom:1px solid var(--header-border);
   position:relative;
 }
@@ -163,7 +164,7 @@ body.afternoon .noon-glow { opacity:1; }
 
 /* ── Floor Map ── */
 .map-card {
-  grid-column:1/-1; background:var(--surface); border:1px solid var(--border);
+ background:var(--surface); border:1px solid var(--border);
   border-radius:18px; padding:14px 16px; display:flex; flex-direction:column; gap:10px;
 }
 .map-top { display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:8px; }
@@ -173,7 +174,7 @@ body.afternoon .noon-glow { opacity:1; }
 .legend-dot { width:8px;height:8px;border-radius:50%; }
 
 .music-ticker-wrap {
-  grid-column:1/-1;
+
   width:100%;overflow:hidden;
   background:var(--surface2);border:1px solid var(--border);border-radius:8px;
   padding:5px 0;position:relative;
@@ -356,10 +357,9 @@ body.night .add-btn { color:#0f0e14; }
 
 /* ── Chatroom ── */
 .chatroom {
-  grid-column:1;grid-row:auto;
   background:var(--surface);border:1px solid var(--border);
   border-radius:18px;display:flex;flex-direction:column;
-  max-height:480px;position:static;overflow:hidden;
+  max-height:520px;overflow:hidden;
 }
 .chat-header {
   padding:12px 14px 10px;border-bottom:1px solid var(--border);
@@ -577,11 +577,7 @@ body.night .cat-btn.active { color:#0f0e14; }
 .tray-item:hover { opacity:.6; }
 .tray-label { font-size:10px;color:var(--muted2);margin-right:4px; }
 
-@media(max-width:720px){
-  .app { grid-template-columns:1fr; }
-  .music-ticker-wrap { grid-column:1; }
-  .map-card { grid-column:1; }
-  .chatroom { grid-column:1;grid-row:auto;position:static;height:auto;max-height:480px; }
+@media(max-width:480px){
   .floor-wrap { height:160px; }
   .hours-badge { display:none; }
 }
