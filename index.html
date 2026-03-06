@@ -116,7 +116,7 @@ body.afternoon .noon-glow { opacity:1; }
 
 /* ── Layout ── */
 .app {
-  max-width:720px; width:100%; margin:0 auto; padding:160px 16px 22px;
+  max-width:720px; width:100%; margin:0 auto; padding:200px 16px 22px;
   display:flex; flex-direction:column;
   gap:16px; min-height:100vh;
   position:relative; z-index:1;
@@ -694,6 +694,27 @@ body.night .cat-btn.active { color:#0f0e14; }
   border-bottom: none;
 }
 
+
+/* ── Master Notice ── */
+.master-notice {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 7px 12px;
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  font-size: 12px;
+  color: var(--text2);
+  transition: background var(--transition-speed), border-color var(--transition-speed);
+}
+.master-notice-icon {
+  font-size: 14px;
+  flex-shrink: 0;
+}
+.master-notice-text {
+  flex: 1;
+}
 </style>
 </head>
 <body>
@@ -717,6 +738,10 @@ body.night .cat-btn.active { color:#0f0e14; }
   </div>
 
   <!-- Floor Map -->
+  <div class="master-notice" id="master-notice">
+    <span class="master-notice-icon">📋</span>
+    <span class="master-notice-text" id="master-notice-text">読み込み中…</span>
+  </div>
   <div class="music-ticker-wrap" id="music-ticker-wrap">
       <div class="music-ticker" id="music-ticker"></div>
     </div>
@@ -1371,6 +1396,7 @@ function applyTheme(period,first){
   const m=PM[period];
   document.body.className=period;
   document.getElementById('header-icon').textContent=m.icon;
+  updateMasterNotice(period);
   const hb=document.getElementById('hours-badge');if(hb)hb.textContent=m.hours;
   document.getElementById('header-title').textContent=m.title;
   document.getElementById('header-sub').textContent=m.sub;
@@ -1918,6 +1944,35 @@ function showProfile(npcId){
 function closeProfile(e){
   if(e&&e.target!==document.getElementById('profile-overlay'))return;
   document.getElementById('profile-overlay').classList.remove('show');
+}
+
+const MASTER_NOTICES = {
+  morning: [
+    '☀️ おはようございます！本日も開店しております。ゆっくりどうぞ。',
+    '🍳 モーニングセット、本日も7種類ご用意しています。',
+    '☕ 朝のスペシャルブレンド、今日もお出しできます。',
+    '🌅 早起きえらい。今日もいい一日になりますように。',
+  ],
+  afternoon: [
+    '🍰 本日のケーキはチーズケーキとガトーショコラです。',
+    '🌿 ランチタイム、混み合う場合がございます。ご了承ください。',
+    '☕ 午後のブレンド、只今お出しできます。',
+    '🪴 午後もゆっくり作業していってください。',
+  ],
+  night: [
+    '🌙 深夜のご利用、ありがとうございます。ゆっくりどうぞ。',
+    '🕯️ 夜のメニュー、ホットドリンク各種ご用意しています。',
+    '⭐ 夜も静かに、作業のお供に。',
+    '🌒 深夜限定のほうじ茶ラテ、本日もございます。',
+  ],
+};
+
+// ══ MASTER NOTICE ══
+function updateMasterNotice(period){
+  const msgs = MASTER_NOTICES[period] || MASTER_NOTICES.afternoon;
+  const text = msgs[Math.floor(Math.random() * msgs.length)];
+  const el = document.getElementById('master-notice-text');
+  if(el) el.textContent = text;
 }
 
 // ══ INIT ══
