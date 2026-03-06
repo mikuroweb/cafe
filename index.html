@@ -35,12 +35,12 @@
 
 /* ── MORNING (5–11) ── */
 body.morning {
-  --bg:#f0ebe0; --surface:#faf6ef; --surface2:#f0e8d8; --surface3:#e8dcc8;
-  --border:#ddd0b8; --border2:#ccc0a0;
-  --accent:#c08840; --accent2:#8a5c28;
-  --text:#3a2810; --text2:#6a4e30; --muted:#9a8060; --muted2:#c0a880;
-  --green:#4a8860; --sky:#88aacc;
-  --header-border: rgba(192,136,64,.35);
+  --bg:#e8f4f8; --surface:#f2fafc; --surface2:#daeef5; --surface3:#c8e4ed;
+  --border:#aad4e4; --border2:#90c4d8;
+  --accent:#2a8aaa; --accent2:#1a6a88;
+  --text:#1a3a48; --text2:#2e5a70; --muted:#5a8a9a; --muted2:#8ab8c8;
+  --green:#3a9070; --sky:#60b8d8;
+  --header-border: rgba(42,138,170,.3);
 }
 /* ── AFTERNOON (11–17) ── */
 body.afternoon {
@@ -783,7 +783,7 @@ const PM={
     ct:'💬 朝のカフェチャット',cs:'おはよう〜みんないる',
     sm:'— おはようございます ☀️ —',
     bi:'☕',pl:'今日の進捗',tbl:'朝休憩 ☕',pb:'🌅 朝',
-    ff:'#faf6ef',fs:'#ddd0b8',tf:'#f0e8d8',ts:'#ccc0a0',cf:'#faf6ef',
+    ff:'#f2fafc',fs:'#aad4e4',tf:'#daeef5',ts:'#90c4d8',cf:'#f2fafc',
     cl:'カウンター ☕',dc:'☀️',
   },
   afternoon:{
@@ -1534,19 +1534,84 @@ let toastTmr=null;
 function showToast(msg){const t=document.getElementById('move-toast');t.textContent=msg;t.classList.add('show');clearTimeout(toastTmr);toastTmr=setTimeout(function(){t.classList.remove('show');},3000);}
 
 // ══ IDLE & CONVERSATIONS ══
-function scheduleIdle(id){
-  const delay=30000+Math.random()*60000;
-  setTimeout(function(){
-    aiIdle(id,function(msg){addChatMsg(id,msg);scheduleIdle(id);});
-  },delay);
-}
-const CP=[
-  {a:'haru',b:'mia',ak:'talk_to_mia',bk:'reply_haru'},{a:'mia',b:'haru',ak:'talk_to_haru',bk:'reply_mia'},
-  {a:'sou',b:'mia',ak:'talk_to_mia',bk:'reply_sou'},{a:'mia',b:'sou',ak:'talk_to_sou',bk:'reply_mia'},
-  {a:'haru',b:'sou',ak:'talk_to_sou',bk:'reply_haru'},{a:'sou',b:'haru',ak:'talk_to_haru',bk:'reply_sou'},
-];
+const CONV_TOPICS={
+  morning:[
+    {a:'haru',b:'mia',  msgA:'ミアさん今日も早いね〜',  msgB:'ふわ〜、6時起きはさすがにきつかった笑'},
+    {a:'mia', b:'haru', msgA:'ハルくんコーヒーもう頼んだ？',msgB:'もちろん。2杯目だよ'},
+    {a:'haru',b:'sou',  msgA:'ソウさん朝から来てるとは思わなかった',msgB:'…昨日から来てる'},
+    {a:'sou', b:'mia',  msgA:'…今日何やるの',           msgB:'午前中は論文、午後はデータ整理ですね！'},
+    {a:'mia', b:'sou',  msgA:'ソウさんヘッドホン外して珍しい',msgB:'…充電切れた'},
+    {a:'haru',b:'mia',  msgA:'朝のここ、静かでいいよな〜',msgB:'わかります〜！集中できるんですよね'},
+    {a:'sou', b:'haru', msgA:'…今日の予定は',           msgB:'午前中にPR出して、あとはレビュー待ち'},
+    {a:'mia', b:'haru', msgA:'この朝の空気、好きなんですよね',msgB:'それな。夜とまた違う感じがする'},
+  ],
+  afternoon:[
+    {a:'haru',b:'mia',  msgA:'ミアさんお昼なんか食べた？',msgB:'ここのサンドイッチ食べました！美味しかった〜'},
+    {a:'mia', b:'sou',  msgA:'午後眠くないですか？',     msgB:'…眠い'},
+    {a:'sou', b:'haru', msgA:'…作業はかどってる？',      msgB:'まあまあかな。コード書いてたら止まらなくなった'},
+    {a:'haru',b:'sou',  msgA:'ソウさん今日何時間いるの', msgB:'…わからん'},
+    {a:'mia', b:'haru', msgA:'ハルくん今日ずっとここにいる感じ？',msgB:'たぶんね〜夕方まではいると思う'},
+    {a:'sou', b:'mia',  msgA:'…論文どう',               msgB:'もう少しで一章終わります！たぶん笑'},
+    {a:'haru',b:'mia',  msgA:'午後のここ、ちょっと混んでくるよね',msgB:'そうなんですよね〜でも好きです'},
+    {a:'mia', b:'sou',  msgA:'ソウさんコーヒー何杯目ですか',msgB:'…4杯'},
+  ],
+  night:[
+    {a:'haru',b:'sou',  msgA:'もうこんな時間か',          msgB:'…まだいける'},
+    {a:'sou', b:'mia',  msgA:'…夜のここって落ち着く',    msgB:'わかります。なんか深夜のカフェって特別な感じしますよね'},
+    {a:'mia', b:'haru', msgA:'ハルくん今日どうだった？',  msgB:'なかなか良かった。バグ一個潰せた'},
+    {a:'haru',b:'mia',  msgA:'ミアさん論文進んだ？',      msgB:'少しだけ…でも前進です！'},
+    {a:'sou', b:'haru', msgA:'…今の曲いいな',            msgB:'だよな。深夜のlofiって刺さる'},
+    {a:'mia', b:'sou',  msgA:'ソウさんって毎日ここ来るんですか？',msgB:'…だいたい'},
+    {a:'haru',b:'sou',  msgA:'深夜のここ、なんか好きなんだよな',msgB:'…同じく'},
+    {a:'sou', b:'mia',  msgA:'…眠くない？',              msgB:'眠いけど帰りたくない感じです笑'},
+  ],
+};
 
-// ══ NPC PROFILES ══
+const IDLE_MSGS={
+  haru:{
+    morning:['コーヒーの香りが好きなんだよな〜','今日なんか調子いい気がする','朝のここ、静かで作業はかどる','ちょっとコーヒーおかわりしてくる','（キーボードをカタカタ）'],
+    afternoon:['午後の眠気やばい…','集中してたら2時間経ってた','そろそろ休憩いれようかな','コード書くの楽しいな〜','（伸びをする）'],
+    night:['深夜のここ、落ち着くな','今日もなかなかいい感じだった','もう少しだけやろう','夜のコーヒー、染みる','（画面を見つめる）'],
+  },
+  mia:{
+    morning:['朝のカフェって最高ですよね','今日は調子よさそうな気がする！','ハーブティーおいしい〜','論文…がんばろ','（ノートを広げる）'],
+    afternoon:['午後もがんばります！','ちょっと眠くなってきたかも…','データ整理、地味だけど大事','おやつ食べたい気分笑','（ページをめくる）'],
+    night:['夜のカフェって雰囲気いいですよね〜','論文あと少しで一章終わる！','深夜テンション上がってきた笑','静かで集中できる〜','（コーヒーをすする）'],
+  },
+  sou:{
+    morning:['…','（ヘッドホンをつけ直す）','…眠い','…今日もここか','（コーヒーを飲む）'],
+    afternoon:['…','（画面を見る）','…集中してた','…コーヒー切れた','（静かに作業している）'],
+    night:['…','（深夜の静寂）','…いい時間だ','…帰れない','（キーを叩く音だけが響く）'],
+  },
+};
+
+function getIdleMsg(npcId){
+  const msgs=IDLE_MSGS[npcId];
+  if(!msgs)return rnd(G(npcId,'idle')||['…']);
+  return rnd(msgs[currentPeriod]||msgs.night);
+}
+
+function scheduleIdle(id){
+  setTimeout(function(){
+    const msg=getIdleMsg(id);
+    addChatMsg(id,msg);
+    scheduleIdle(id);
+  }, 30000+Math.random()*60000);
+}
+
+function scheduleConv(){
+  setTimeout(function(){
+    const pool=CONV_TOPICS[currentPeriod]||CONV_TOPICS.night;
+    const p=rnd(pool);
+    addChatMsg(p.a, p.msgA);
+    setTimeout(function(){
+      addChatMsg(p.b, p.msgB);
+    }, 2000+Math.random()*1500);
+    scheduleConv();
+  }, 35000+Math.random()*70000);
+}
+
+
 const NPC_PROFILES={
   haru:{
     name:'ハル',emoji:'🧑‍💻',color:'var(--accent)',
@@ -1585,124 +1650,6 @@ const NPC_PROFILES={
     favorites:['🌒 深夜の静寂','📖 文庫本','…'],
   },
 };
-// ══ AI CONVERSATION ══
-const NPC_PERSONAS={
-  haru:'ハル（🧑‍💻）男性。プログラマー。フレンドリーでさりげなく気を遣う。タメ口。「〜じゃん」「〜だよな」「それな」など自然なカジュアル語尾。短めの返答。',
-  mia:'ミア（🌿）女性。大学院生。明るくておっちょこちょい。「〜ですね」「わかります〜！」など丁寧だけど砕けた語尾。感嘆符多め。',
-  sou:'ソウ（🎧）男性。無口なエンジニア。必要最低限しか言わない。「…」で始まることが多い。超短文。クールだが優しさが滲む。',
-  nozomi:'ノゾミ（🌸）女性。朝活好き。元気で前向き。「〜ですよ！」など明るい語尾。',
-  ken:'ケン（💼）男性。リモートワーク中。丁寧だが親しみやすい。',
-  shio:'シオ（🌒）深夜の常連。詩的でゆったり。短文。「…」多め。',
-};
-const PERIOD_CONTEXT={
-  morning:'朝（5〜11時）。コーヒーの香り、今日の予定、朝の清々しさ。',
-  afternoon:'昼〜夕方（11〜17時）。午後の眠気、ランチ、作業の進捗。',
-  night:'夜〜深夜（17〜5時）。静けさ、集中、夜にしか言えない話。',
-};
-
-function buildPrompt(npcId, situation){
-  const hour=new Date().getHours();
-  return NPC_PERSONAS[npcId]+'\n'+PERIOD_CONTEXT[currentPeriod]+'（'+hour+'時）\n\n'+situation+'\n\nルール：1〜2文以内。キャラクターの口調を守る。セリフだけ返す。説明・地の文不要。';
-}
-
-function callClaude(promptText, onSuccess, onFail){
-  fetch('https://api.anthropic.com/v1/messages',{
-    method:'POST',
-    headers:{'Content-Type':'application/json'},
-    body:JSON.stringify({
-      model:'claude-sonnet-4-20250514',
-      max_tokens:100,
-      messages:[{role:'user',content:promptText}]
-    })
-  }).then(function(res){return res.json();})
-  .then(function(data){
-    const text=data.content&&data.content[0]&&data.content[0].text;
-    if(text&&text.trim()) onSuccess(text.trim());
-    else if(onFail) onFail();
-  }).catch(function(){if(onFail)onFail();});
-}
-
-function runConversation(npcA, npcB){
-  const topics={
-    morning:['今日やること決めた？','朝からここ来てるの珍しくない？','コーヒーもう頼んだ？','今日なんか調子よさそう'],
-    afternoon:['お昼なんか食べた？','午後眠くない？','作業はかどってる？','ここ最近どう'],
-    night:['もうこんな時間か','夜のここって落ち着くよね','今日どうだった？','最近何か変わったことあった？'],
-  };
-  // 30%の確率で今流れてる曲の話をする
-  let topic;
-  if(Math.random()<0.3 && _currentSong){
-    const musicTopics=[
-      'この曲いいね、「'+_currentSong.title+'」',
-      '今流れてる曲、'+_currentSong.artist+'だっけ？',
-      '「'+_currentSong.title+'」って知ってる？',
-      'このBGMいい感じだよね',
-      '今の曲、作業にぴったりじゃない？',
-    ];
-    topic=rnd(musicTopics);
-  } else {
-    topic=rnd(topics[currentPeriod]);
-  }
-  const nameB=NPC_PERSONAS[npcB].split('（')[0];
-  const nameA=NPC_PERSONAS[npcA].split('（')[0];
-
-  // ターン1: A が話しかける
-  const p1=buildPrompt(npcA, nameB+'に話しかけてください。テーマ：「'+topic+'」');
-  callClaude(p1, function(msgA){
-    addChatMsg(npcA, msgA);
-    // ターン2: B が返す
-    setTimeout(function(){
-      const p2=buildPrompt(npcB, nameA+'から「'+msgA+'」と言われた。自然に返す。');
-      callClaude(p2, function(msgB){
-        addChatMsg(npcB, msgB);
-        // 50%でもう1ターン
-        if(Math.random()<0.5){
-          setTimeout(function(){
-            const p3=buildPrompt(npcA, '会話の流れ：あなた「'+msgA+'」→相手「'+msgB+'」。一言返して会話を締める。');
-            callClaude(p3, function(msgA2){
-              addChatMsg(npcA, msgA2);
-            }, null);
-          }, 2500+Math.random()*2000);
-        }
-      }, function(){
-        // fallback
-        addChatMsg(npcB, rnd(G(npcB, 'reply_'+npcA)));
-      });
-    }, 2000+Math.random()*1500);
-  }, function(){
-    // fallback to static
-    const p=CP.find(function(c){return c.a===npcA&&c.b===npcB;})||rnd(CP);
-    addChatMsg(p.a, rnd(G(p.a, p.ak)));
-    setTimeout(function(){addChatMsg(p.b, rnd(G(p.b, p.bk)));}, 2400);
-  });
-}
-
-function aiIdle(npcId, onResult){
-  const useMusicTopic=Math.random()<0.2&&_currentSong;
-  const idleSituation=useMusicTopic
-    ? 'カフェでひとりごとを一言つぶやく。今「'+_currentSong.title+' — '+_currentSong.artist+'」という曲が流れている。曲に触れてもいいし触れなくてもいい。1文のみ。'
-    : 'カフェでひとりごとを一言つぶやく。1文のみ。';
-  const p=buildPrompt(npcId, idleSituation);
-  callClaude(p, onResult, function(){
-    onResult(rnd(G(npcId,'idle')));
-  });
-}
-
-function scheduleIdle(id){
-  setTimeout(function(){
-    aiIdle(id, function(msg){
-      addChatMsg(id, msg);
-      scheduleIdle(id);
-    });
-  }, 30000+Math.random()*60000);
-}
-
-function scheduleConv(){
-  setTimeout(function(){
-    const p=rnd(CP);
-    runConversation(p.a, p.b);
-    scheduleConv();
-  }, 40000+Math.random()*80000);
-}
 
 // ══ NPC PROFILE MODAL ══
 function showProfile(npcId){
@@ -1732,6 +1679,7 @@ window.addEventListener('load',function(){
   setTimeout(function(){addChatMsg('mia',rnd(G('mia','greet')));},4500);
   setTimeout(function(){addChatMsg('sou',rnd(G('sou','greet')));},8000);
   Object.keys(NPCS).forEach(function(id){scheduleIdle(id);scheduleMove(id);});
+  scheduleConv();
   // make member chips clickable
   Object.keys(NPCS).forEach(function(id){
     const chip=document.getElementById('chip-'+id);
