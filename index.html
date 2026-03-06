@@ -667,7 +667,7 @@ body.night .cat-btn.active { color:#0f0e14; }
       </div>
     </div>
     <div class="floor-wrap" id="floor-wrap">
-      <svg class="floor-svg" id="floor-svg" viewBox="0 0 560 190" preserveAspectRatio="xMidYMid meet" xmlns="http://www.w3.org/2000/svg">
+      <svg class="floor-svg" id="floor-svg" viewBox="0 0 560 190" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
         <!-- filled by JS per theme -->
       </svg>
       <div class="npc-token haru" id="token-haru">🧑‍💻<div class="tlabel">ハル</div></div>
@@ -1140,16 +1140,7 @@ function drawFloor(){
 function mkEl(tag,cls,txt){const e=document.createElement(tag);if(cls)e.className=cls;if(txt!=null)e.textContent=txt;return e;}
 function getSVGRect(){
   const wrap=document.getElementById('floor-wrap');
-  const svg=document.getElementById('floor-svg');
-  // Use SVG's own getBBox via getScreenCTM if available, else fallback
-  // getBoundingClientRect gives rendered size relative to viewport
-  const wrapRect=wrap.getBoundingClientRect();
-  const svgRect=svg.getBoundingClientRect();
-  const ox=svgRect.left - wrapRect.left;
-  const oy=svgRect.top  - wrapRect.top;
-  const rw=svgRect.width;
-  const rh=svgRect.height;
-  return {ox,oy,rw,rh};
+  return {ox:0, oy:0, rw:wrap.clientWidth, rh:wrap.clientHeight};
 }
 function placeToken(id,spotKey,animate){
   const sp=SPOTS[spotKey];
