@@ -202,11 +202,15 @@ body.afternoon .noon-glow { opacity:1; }
 .ticker-sep { color:var(--muted2);padding:0 4px; }
 /* ticker animation handled by JS */
 .floor-wrap {
-  position:relative; width:100%; aspect-ratio:560/190; height:auto;
+  position:relative; width:100%;
+  height:0; padding-bottom:33.93%; /* 190/560 */
+}
+.floor-wrap > * {
+  position:absolute; top:0; left:0; width:100%; height:100%;
 }
 .floor-svg { width:100%;height:100%;position:absolute;top:0;left:0; }
 
-@keyframes float{0%,100%{margin-top:0;}50%{margin-top:-2px;}}
+@keyframes float{0%,100%{transform:translate(-50%,-50%) translateY(0);}50%{transform:translate(-50%,-50%) translateY(-3px);}}
 @keyframes pulse{0%,100%{opacity:1;}50%{opacity:.35;}}
 
 .npc-token {
@@ -240,7 +244,6 @@ body.night .npc-token { filter:drop-shadow(0 2px 8px rgba(0,0,0,.8)); }
   position:absolute;width:28px;height:28px;border-radius:50%;
   background:var(--surface3);border:2px solid #8866cc;
   display:none;align-items:center;justify-content:center;font-size:14px;
-  transform:translate(-50%,-50%);
   transition: left 1.2s cubic-bezier(.4,0,.2,1), top 1.2s cubic-bezier(.4,0,.2,1);
   z-index:12;filter:drop-shadow(0 0 8px rgba(140,100,220,.5));
   animation:float 2s ease-in-out infinite;pointer-events:none;
@@ -1081,12 +1084,12 @@ function GN(){return GNPCS[currentPeriod];}
 
 // ══ FLOOR MAP ══
 const SPOTS={
-  tableA_L:{fx:14/560,fy:38/190,label:'テーブルA'},tableA_R:{fx:68/560,fy:38/190,label:'テーブルA'},
-  tableB_L:{fx:14/560,fy:120/190,label:'テーブルB'},tableB_R:{fx:68/560,fy:120/190,label:'テーブルB'},
+  tableA_L:{fx:24/560,fy:38/190,label:'テーブルA'},tableA_R:{fx:71/560,fy:38/190,label:'テーブルA'},
+  tableB_L:{fx:24/560,fy:120/190,label:'テーブルB'},tableB_R:{fx:104/560,fy:120/190,label:'テーブルB'},
   tableC_T:{fx:189/560,fy:40/190,label:'テーブルC'},tableC_B:{fx:189/560,fy:108/190,label:'テーブルC'},
   tableC_L:{fx:149/560,fy:74/190,label:'テーブルC'},tableC_R:{fx:229/560,fy:74/190,label:'テーブルC'},
   tableD_T:{fx:332/560,fy:66/190,label:'テーブルD'},tableD_B:{fx:332/560,fy:130/190,label:'テーブルD'},
-  sofa1:{fx:30/560,fy:158/190,label:'ソファE'},sofa2:{fx:75/560,fy:158/190,label:'ソファE'},
+  sofa1:{fx:45/560,fy:158/190,label:'ソファE'},sofa2:{fx:83/560,fy:158/190,label:'ソファE'},
   cnt1:{fx:423/560,fy:47/190,label:'カウンター'},cnt2:{fx:459/560,fy:47/190,label:'カウンター'},
   cnt3:{fx:495/560,fy:47/190,label:'カウンター'},cnt4:{fx:531/560,fy:47/190,label:'カウンター'},
 };
@@ -1118,18 +1121,19 @@ function drawFloor(){
   });
   function tbl(x,y,w,h,label,lx,ly,chairs){
     mk('rect',{x:x,y:y,width:w,height:h,rx:6,fill:m.tf,stroke:m.ts,'stroke-width':1});
-    mk('text',{x:lx,y:ly,'text-anchor':'middle','font-size':8,fill:m.ts},label);
-    mk('text',{x:lx,y:ly-12,'text-anchor':'middle','font-size':9},m.dc);
+    // horizontal label centered in table
+    const cx=x+w/2, cy=y+h/2+3;
+    mk('text',{x:cx,y:cy,'text-anchor':'middle','dominant-baseline':'middle','font-size':9,fill:m.ts},m.dc+' '+label);
     chairs.forEach(function(c){mk('circle',{cx:c[0],cy:c[1],r:8,fill:m.cf,stroke:m.ts,'stroke-width':1});});
   }
-  tbl(14,22,54,32,'A',41,37,[[14,38],[68,38]]);
-  tbl(14,104,54,32,'B',41,119,[[14,120],[68,120]]);
+  tbl(24,22,47,32,'A',47,37,[[24,38],[71,38]]);
+  tbl(24,104,80,32,'B',64,119,[[24,120],[104,120]]);
   tbl(155,46,68,56,'C',189,76,[[189,40],[189,108],[149,74],[229,74]]);
   tbl(305,72,54,52,'D',332,100,[[332,66],[332,130]]);
-  mk('rect',{x:14,y:152,width:88,height:26,rx:5,fill:m.tf,stroke:m.ts,'stroke-width':1});
-  mk('rect',{x:14,y:143,width:13,height:35,rx:4,fill:m.tf,stroke:m.ts,'stroke-width':1});
-  mk('rect',{x:89,y:143,width:13,height:35,rx:4,fill:m.tf,stroke:m.ts,'stroke-width':1});
-  mk('text',{x:58,y:168,'text-anchor':'middle','font-size':8,fill:m.ts},'ソファ E');
+  mk('rect',{x:24,y:152,width:80,height:26,rx:5,fill:m.tf,stroke:m.ts,'stroke-width':1});
+  mk('rect',{x:24,y:143,width:10,height:35,rx:4,fill:m.tf,stroke:m.ts,'stroke-width':1});
+  mk('rect',{x:94,y:143,width:10,height:35,rx:4,fill:m.tf,stroke:m.ts,'stroke-width':1});
+  mk('text',{x:64,y:168,'text-anchor':'middle','font-size':8,fill:m.ts},'ソファ E');
   mk('circle',{cx:540,cy:168,r:12,fill:m.tf,stroke:m.ts,'stroke-width':1});
   mk('text',{x:540,y:173,'text-anchor':'middle','font-size':13},'🌿');
   mk('circle',{cx:120,cy:168,r:10,fill:m.tf,stroke:m.ts,'stroke-width':1});
