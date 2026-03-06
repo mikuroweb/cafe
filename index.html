@@ -1145,6 +1145,7 @@ function getSVGRect(){
   const scale=Math.min(ww/vbW, wh/vbH);
   const rw=vbW*scale, rh=vbH*scale;
   const ox=(ww-rw)/2, oy=(wh-rh)/2;
+  document.title='ww='+Math.round(ww)+' wh='+Math.round(wh)+' scale='+scale.toFixed(3)+' rw='+Math.round(rw)+' rh='+Math.round(rh)+' ox='+Math.round(ox)+' oy='+Math.round(oy);
   return {ox,oy,rw,rh};
 }
 function placeToken(id,spotKey,animate){
