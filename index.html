@@ -1253,7 +1253,12 @@ function updateClock(){
   try{
     const n=new Date();
     document.getElementById('clock').textContent=pad(n.getHours())+':'+pad(n.getMinutes());
-    const p=getPeriod();if(p!==currentPeriod)applyTheme(p,false);
+    const p=getPeriod();
+    if(p!==currentPeriod){
+      applyTheme(p,false);
+      const msgs={morning:'朝になった…おはよう',afternoon:'あ、もう昼か〜',night:'夜になってきたな'};
+      if(msgs[p]) setTimeout(function(){addChatMsg('haru',msgs[p]);},1000);
+    }
   }catch(e){
     // Show error visibly on page
     const d=document.getElementById('clock');
