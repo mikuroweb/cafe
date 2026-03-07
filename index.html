@@ -1697,7 +1697,7 @@ function placeOrder(item){
   if(!userSpot){addSysMsg('— 注文は席についてからどうぞ 🪑 —');showToast('先に席に座ってね 🪑');return;}
   const log=document.getElementById('chat-log'),time=getNow();
   const row=mkEl('div','chat-row me'),wrap=mkEl('div','chat-bubble-wrap');
-  const bub=mkEl('div','chat-bubble',item.emoji+' '+item.name+' をオーダーしました');
+  const bub=mkEl('div','chat-bubble',item.emoji+' '+item.name+' を1つください');
   const ts=mkEl('div','bubble-ts',time+' · あなた');
   wrap.appendChild(bub);wrap.appendChild(ts);row.appendChild(wrap);log.appendChild(row);log.scrollTop=log.scrollHeight;
   addSysMsg('— 🛎 注文受付：'+item.name+' —');
@@ -1738,9 +1738,9 @@ function renderTray(){
       // waiter receipt message in chat after popup fades
       setTimeout(function(){
         const receiptMsgs=[
-          'レシートお置きしますね。本日の合計は ¥'+totalSpent.toLocaleString()+' です 🧾',
+          'レシートこちらに失礼します。本日の合計は ¥'+totalSpent.toLocaleString()+' です 🧾',
           'ありがとうございました！合計 ¥'+totalSpent.toLocaleString()+' になります 🧾',
-          'お会計は ¥'+totalSpent.toLocaleString()+' でございます。またどうぞ 🙏',
+          'お会計は ¥'+totalSpent.toLocaleString()+' でございます。美味しいのでたくさん注文してくださいね',
         ];
         addChatMsg('staff', rnd(receiptMsgs), 0, true);
       }, 2400);
@@ -2055,29 +2055,29 @@ function updateMasterNotice(period){
 // ══ ITEM REACTIONS ══
 const ITEM_REACTIONS = {
   'ブレンドコーヒー':   {msgs:['ふわっとした苦み、好きだな…','コーヒーの香り最高','定番はやっぱりいい'], price:480},
-  'アメリカーノ':       {msgs:['すっきりして頭が冴えてきた','さっぱりうまい'], price:450},
-  'カフェラテ':         {msgs:['まろやかでほっとする…','ミルク多めが好き'], price:520},
-  'カプチーノ':         {msgs:['泡ふわふわ〜！','カプチーノって贅沢な気分になる'], price:540},
+  'アメリカーノ':       {msgs:['すっきりして頭が冴えてきた','さっぱりうまい','この洗練された味の薄さがいいんだよね'], price:450},
+  'カフェラテ':         {msgs:['まろやかでほっとする…','ミルク多めが好き','リラックスできる味だ…'], price:520},
+  'カプチーノ':         {msgs:['泡ふわふわ〜！','カプチーノって贅沢な気分になる','泡が口の周りに…っ！'], price:540},
   'カフェモカ':         {msgs:['甘くて幸せ〜','チョコとコーヒーって最強'], price:560},
-  'アイスコーヒー':     {msgs:['冷たくて美味しい！','キンキンで最高'], price:480},
-  '緑茶':               {msgs:['落ち着く味…','お茶って癒される'], price:400},
+  'アイスコーヒー':     {msgs:['冷たくて美味しい！','キンキンで最高','ミルク入れても入れなくてもうまい'], price:480},
+  '緑茶':               {msgs:['落ち着く味…','お茶って癒される','ジャパニーズカフェイン～'], price:400},
   'アールグレイ':       {msgs:['いい香り〜！','ちょっとリッチな気分'], price:480},
   '桜ほうじ茶':         {msgs:['ほうじ茶の香ばしさ好き','あったまる…'], price:500},
-  'チャイ':             {msgs:['スパイスが効いてる！','体があったまる'], price:520},
+  'チャイ':             {msgs:['スパイスが効いてる！','体があったまる','なんだろう…異国情緒がすごい'], price:520},
   'ハーブティー':       {msgs:['ハーブの香りでリラックス','体に良さそう'], price:500},
-  'マンゴーラッシー':   {msgs:['甘くてとろとろ〜！','これやばいうまい'], price:580},
-  'チーズケーキ':       {msgs:['しっとりしてる…最高','チーズケーキ食べると幸せ'], price:620},
+  'マンゴーラッシー':   {msgs:['甘くてとろとろ〜！','これやばいうまい','ナンとカレーが欲しくなる味だ～'], price:580},
+  'チーズケーキ':       {msgs:['しっとりしてる…最高','チーズケーキ食べると幸せ','美味しかった…炊飯器で作ってみようかな'], price:620},
   'ガトーショコラ':     {msgs:['濃厚すぎる…最高','チョコの苦みが好き'], price:650},
   'クロワッサン':       {msgs:['サクサクでバター香る〜','朝のクロワッサン最高'], price:380},
-  'フレンチトースト':   {msgs:['とろとろでうまい…！','フレンチトーストって幸せ'], price:720},
+  'フレンチトースト':   {msgs:['とろとろでうまい…！','フレンチトーストって幸せ','毎日食べたい～'], price:720},
   'スコーン':           {msgs:['ほろほろでおいしい','紅茶と合う'], price:420},
-  'パンケーキ':         {msgs:['ふわふわ〜！たまらん','甘くて最高'], price:780},
-  'アボカドトースト':   {msgs:['ヘルシーでうまい','アボカドって罪な美味しさ'], price:680},
+  'パンケーキ':         {msgs:['ふわふわ〜！たまらん','甘くて最高','どう作ればこんなふわふわに…？'], price:780},
+  'アボカドトースト':   {msgs:['ヘルシーでうまい','アボカドって罪な美味しさ','おかわりしたくなる…'], price:680},
 };
 function getReaction(itemName){
   const r = ITEM_REACTIONS[itemName];
   if(r) return r;
-  return {msgs:['美味しかった！','ごちそうさま〜','また頼もうかな'], price:500};
+  return {msgs:['美味しかった！','ごちそうさま〜','また頼もうかな','次は何にしようかな～！'], price:500};
 }
 let totalSpent = 0;
 
