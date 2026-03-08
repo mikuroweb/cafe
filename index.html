@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Lofi Cafe ☕</title>
+<title>カフェ作業 ☕</title>
 
 <style>
 /* ══════════════════════════════════════
@@ -755,6 +755,7 @@ body.night .cat-btn.active { color:#0f0e14; }
         <div class="legend-item"><div class="legend-dot" id="leg-haru"></div>ハル</div>
         <div class="legend-item"><div class="legend-dot" id="leg-mia"></div>ミア</div>
         <div class="legend-item"><div class="legend-dot" id="leg-sou"></div>ソウ</div>
+        <div class="legend-item"><div class="legend-dot" id="leg-yuki" style="background:#b06080"></div>ユキ</div>
         <div class="legend-item"><div class="legend-dot" style="background:#8866cc"></div>あなた</div>
       </div>
     </div>
@@ -765,6 +766,7 @@ body.night .cat-btn.active { color:#0f0e14; }
       <div class="npc-token haru" id="token-haru">🧑‍💻<div class="tlabel">ハル</div></div>
       <div class="npc-token mia"  id="token-mia" >🌿<div class="tlabel">ミア</div></div>
       <div class="npc-token sou"  id="token-sou" >🎧<div class="tlabel">ソウ</div></div>
+      <div class="npc-token yuki" id="token-yuki">✍️<div class="tlabel">ユキ</div></div>
       <div class="user-token"     id="token-user">✌️<div class="tlabel">あなた</div></div>
     </div>
     <div class="map-hint" id="map-hint">💺 席をクリックして座る</div>
@@ -789,6 +791,7 @@ body.night .cat-btn.active { color:#0f0e14; }
       <div class="member-chip" onclick="showProfile('haru')"><div class="member-chip-dot" style="background:var(--accent)"></div>🧑‍💻 ハル<span class="member-chip-loc" id="loc-haru"></span></div>
       <div class="member-chip" onclick="showProfile('mia')"><div class="member-chip-dot" style="background:var(--green)"></div>🌿 ミア<span class="member-chip-loc" id="loc-mia"></span></div>
       <div class="member-chip" onclick="showProfile('sou')"><div class="member-chip-dot" style="background:var(--indigo)"></div>🎧 ソウ<span class="member-chip-loc" id="loc-sou"></span></div>
+      <div class="member-chip" id="chip-yuki" onclick="showProfile('yuki')"><div class="member-chip-dot" style="background:#b06080"></div>✍️ ユキ<span class="member-chip-loc" id="loc-yuki"></span></div>
       <div class="member-chip"><div class="member-chip-dot" style="background:#8866cc;animation:pulse 2s infinite;"></div>✌️ あなた<span class="member-chip-loc" id="loc-user">· まだ座ってない</span></div>
     </div>
     <div class="chat-log" id="chat-log">
@@ -1032,12 +1035,12 @@ const NPCS={
       move_comment:['移動したんだ','そっちの席もいいね','気分転換大事だよね'],
     },
     night:{
-      greet:['…お、今日も夜に来たんだ','こんばんは。外、寒くなかった？','また会ったね。夜のここが一番好きなんだよな'],
+      greet:['…お、今日も夜に来たんだ','こんばんは。外、寒くなかった？','また会ったね。深夜のここが一番好きなんだよな'],
       task_added:['ふむ、「{t}」ね。夜にやるやつだ','「{t}」か。集中できそう','夜の方がはかどるよね、{t}みたいなの'],
-      task_done:['「{t}」、終わったんだ。夜に強いね','おつかれ。「{t}」クリアか','やったじゃん。「{t}」終わった〜'],
+      task_done:['「{t}」、終わったんだ。深夜に強いね','おつかれ。「{t}」クリアか','やったじゃん。「{t}」終わった〜'],
       timer_start:['じゃ集中しよ。お互いに','夜のポモドーロ、いいね。俺もやる','（コーヒー口つける）集中集中'],
-      timer_done:['お疲れ。夜の25分えらすぎ','夜中に頑張ったね。休憩しよ','タイマー終わったか。目休めて'],
-      idle:['（コーヒーが冷めてきた…）','外の道路、誰も歩いてないな','夜作業、なんか落ち着くんだよな','夜ってなんか正直になれる気がする','このBGMずっとループしてるな','コーヒー3杯目だ'],
+      timer_done:['お疲れ。深夜の25分えらすぎ','夜中に頑張ったね。休憩しよ','タイマー終わったか。目休めて'],
+      idle:['（コーヒーが冷めてきた…）','外の道路、誰も歩いてないな','深夜作業、なんか落ち着くんだよな','夜ってなんか正直になれる気がする','このBGMずっとループしてるな','コーヒー3杯目だ'],
       move:['ちょっと席変えてくる','コーヒーおかわりしてくる','やっぱり窓際の方がいいかも','気分転換に場所変えよ'],
       talk_to_mia:['ミアさん、論文進んだ？','ミアさん眠そうだけど大丈夫？','ミアさん何飲んでる？'],
       talk_to_sou:['ソウさん、バグ取れた？','ソウさんまた徹夜コース？','ソウさん何時まで居る？'],
@@ -1079,17 +1082,17 @@ const NPCS={
       move_comment:['移動したんですね〜','そっちの席いいですよね','落ち着く場所みつかった？'],
     },
     night:{
-      greet:['こんばんは〜。今日も夜作業？','あ、来てたんだ。ここ夜も居心地いいよね','ふわ〜眠い…でも来ちゃった'],
-      task_added:['「{t}」かあ。夜にやるの偉い','「{t}」！夜にやるんだ…すごい','「{t}」、一緒に頑張ろ〜'],
-      task_done:['わあ「{t}」できた！夜なのに！','えらい〜。「{t}」終わったじゃん','やった〜！「{t}」完了おめでとう'],
-      timer_start:['私も集中する…！眠いけど','ポモドーロか。夜でもやるじゃん','（背筋伸ばす）よし、一緒に'],
-      timer_done:['お疲れ様〜！夜中なのにすごい','休憩してね。目、疲れてない？','夜25分がんばったね〜えらい'],
+      greet:['こんばんは〜。今日も深夜作業？','あ、来てたんだ。ここ夜も居心地いいよね','ふわ〜眠い…でも来ちゃった'],
+      task_added:['「{t}」かあ。夜にやるの偉い','「{t}」！深夜にやるんだ…すごい','「{t}」、一緒に頑張ろ〜'],
+      task_done:['わあ「{t}」できた！深夜なのに！','えらい〜。「{t}」終わったじゃん','やった〜！「{t}」完了おめでとう'],
+      timer_start:['私も集中する…！眠いけど','ポモドーロか。深夜でもやるじゃん','（背筋伸ばす）よし、一緒に'],
+      timer_done:['お疲れ様〜！夜中なのにすごい','休憩してね。目、疲れてない？','深夜25分がんばったね〜えらい'],
       idle:['眠いけどなんか眠れない夜ってある','さっきお茶おかわりしてきた〜','外、雨降り始めたかも','夜のカフェって時間止まってる感じ好き','論文全然進まなくて現実逃避してる','でもここいると落ち着く不思議'],
       move:['トイレいってきます〜','お茶おかわりしてくる！','あっちの席の方が静かかな〜','カウンター行ってみよ'],
       talk_to_haru:['ハルさん今何時間目ですか？','ハルさん最近何作ってるんですか〜','ハルさんってここ毎日きてますよね'],
       talk_to_sou:['ソウさんいつも集中してますよね','ソウさん、眠くないんですか…？','ソウさんそのお茶何ですか'],
       reply_haru:['ほんとそれ〜','ハルさんさすが！','えらいな〜','そうなんですよ〜'],
-      reply_sou:['ソウさんっていつでも無口ですね笑','えらい…私も見習わなきゃ','ありがとうございます！','そうなんですね〜'],
+      reply_sou:['ソウさんって朝でも無口ですね笑','えらい…私も見習わなきゃ','ありがとうございます！','そうなんですね〜'],
       react_user:['やった〜！来てくれた！','一緒の空間だ〜うれしい','一緒に頑張りましょ！'],
       move_comment:['移動したんですね〜','そっちの席いいですよね','落ち着く場所みつかった？'],
     },
@@ -1126,11 +1129,11 @@ const NPCS={
       move_comment:['…移動か','（気づいてる）','そっちもいいな'],
     },
     night:{
-      greet:['…来たか','（ヘッドホン外して頷く）','夜にいるとは思わなかった。お互いね'],
+      greet:['…来たか','（ヘッドホン外して頷く）','深夜にいるとは思わなかった。お互いね'],
       task_added:['「{t}」か。夜向きのタスクだな','…「{t}」。いいじゃん','一個ずつ。それだけ'],
       task_done:['「{t}」完了か。順調だな','…えらい','その調子。次もできる'],
       timer_start:['…集中しよ','（ヘッドホンつける）','俺もタイマーかけた'],
-      timer_done:['終わったな。少し休め','目閉じてていいよ','夜の25分、価値あるよ'],
+      timer_done:['終わったな。少し休め','目閉じてていいよ','深夜の25分、価値あるよ'],
       idle:['…（黙々と書いてる）','このカフェ夜の方が静かでいい','バグ、一個消えた','…雨か。足音聞こえる','コーヒー、もう三杯目だ','Wi-Fi今日調子いいな'],
       move:['…席変える','（無言で立ち上がる）','ちょっと歩いてくる','…コーヒー'],
       talk_to_haru:['ハルさん、コーヒー何杯目','…ハルさん、それ何のプロジェクト？','ハルさんまた夜更かしですか'],
@@ -1139,6 +1142,59 @@ const NPCS={
       reply_mia:['…大丈夫','ミアさんは休憩しろよ','…うん','なるほど'],
       react_user:['…来たか','（軽く頷く）','席、決めたんだ'],
       move_comment:['…移動か','（気づいてる）','そっちもいいな'],
+    },
+  }},
+  yuki:{id:'yuki',emoji:'✍️',name:'ユキ',cls:'yuki',msgs:{
+    morning:{
+      greet:['…おはようございます','（ノートを開きながら）今日も書きに来ました','朝の静けさがないと、書けない気がして'],
+      task_added:['「{t}」…','…そのテーマ、深いですね','（静かに頷く）'],
+      task_done:['「{t}」…終わったんですね','…よかった','（少し微笑む）すごい'],
+      timer_start:['…集中しましょう','（ペンを握り直す）','…私もここから'],
+      timer_done:['…お疲れ様です','少し、目を休めて','（顔を上げる）終わりましたね'],
+      idle:['…登場人物が、勝手に動き出した','主人公の名前、まだ決まらない…','朝のここが一番、ページが進む','…コーヒー、もう冷めてた','締め切り…まだある、たぶん'],
+      move:['…席、変えます','（静かに立ち上がる）','…窓の光が変わってきた'],
+      talk_to_haru:['ハルさんが作るもの…どんなものですか','…コードも、一種の物語みたいで'],
+      talk_to_mia:['ミアさんの研究…いつか、読んでみたい','…論文と小説、似てるところありますか'],
+      talk_to_sou:['ソウさんが聴いてる音楽…気になります','…静かに作業する人、好きです'],
+      reply_haru:['…なるほど','そういうことか、と','…面白い'],
+      reply_mia:['…そうですね','（少し考えて）たしかに','…ありがとうございます'],
+      reply_sou:['…','（軽く頷く）','…同じく'],
+      react_user:['…来ましたね','（視線をあげて）おはようございます','…今日も、書きに来たんですか'],
+      move_comment:['…席、変えたんですね','（気づいていた）','そっちの光、よさそう'],
+    },
+    afternoon:{
+      greet:['…こんにちは','（ノートから顔を上げて）また来てしまいました','午後の光の中で書くのも、好きで'],
+      task_added:['…「{t}」','（ページの端にメモする）','…それ、書けそうですね'],
+      task_done:['…「{t}」、できたんですね','（静かに)すごい','…私も、一つ終わらせたい'],
+      timer_start:['…集中しましょう','（ペンを構える）','…25分、一緒に'],
+      timer_done:['…お疲れ様です','（顔を上げる）終わりましたね','…少し、休んで'],
+      idle:['午後の光って、文字の見え方が変わる','…主人公が泣き出した。困った','カフェラテ、三杯目になってしまった…','締め切りのことは、今は考えない','…この章、書き直すかも'],
+      move:['…ちょっと、場所を変えます','（ゆっくり立ち上がる）','…あっちの席、静かそう'],
+      talk_to_haru:['ハルさんって…締め切りありますか','…進捗管理、どうやってるんですか'],
+      talk_to_mia:['ミアさんが煮詰まったとき…どうしてますか','…論文、大変そうですね'],
+      talk_to_sou:['ソウさんって…何時間くらい集中できますか','…ソウさんの集中力、羨ましい'],
+      reply_haru:['…なるほど','参考に、します','（メモを取りながら）'],
+      reply_mia:['…そういう方法が','（少し目を見開いて）やってみます','…ありがとうございます'],
+      reply_sou:['…','（頷く）','…同じく'],
+      react_user:['…こんにちは','（本から目を上げて）また会いましたね','…今日も、作業ですか'],
+      move_comment:['…移動したんですね','（静かに見ていた）','そっちも、いい席'],
+    },
+    night:{
+      greet:['…来てしまいました','夜のここが、一番書ける','（ノートを開く）今夜も、お邪魔します'],
+      task_added:['…「{t}」','（夜の光の中で書き留める）','…夜向きのことですね'],
+      task_done:['…「{t}」、終わったんですね','夜中に…すごい','（静かに）よかった'],
+      timer_start:['…集中します','（ペンを走らせながら）','夜の25分、大事に'],
+      timer_done:['…終わりましたね','お疲れ様です','（目を細める）少し、休んで'],
+      idle:['夜になると、登場人物が動き出す','…深夜の文章、朝読み返すのが怖い','今夜は書けてる気がする…','（ペンが止まらない）','…ここの静けさが好き'],
+      move:['…席、変えます','（静かに立ち上がる）','夜は窓側が好きで'],
+      talk_to_haru:['ハルさんも…夜が好きですか','…夜中、何時まで作業しますか'],
+      talk_to_mia:['ミアさんと夜に話すと…なぜか深くなる','…論文と小説、どちらが難しいですか'],
+      talk_to_sou:['ソウさんとは…よく夜に会いますね','…ソウさんが聴いてる曲、今夜は何ですか'],
+      reply_haru:['…なるほど','（静かに）たしかに','…そうかもしれない'],
+      reply_mia:['…深い','（少し間を置いて）そういうことか','…ありがとうございます'],
+      reply_sou:['…','（軽く頷く）','…同じく'],
+      react_user:['…来ましたね','（顔を上げて）こんばんは','夜のここ…好きですか'],
+      move_comment:['（気づいていた）','…席、変えたんですね','夜はそっちの方が、落ち着くかも'],
     },
   }},
 };
@@ -1169,7 +1225,7 @@ const GNPCS={
   afternoon:[
     {id:'ken',emoji:'💼',name:'ケン',bc:'#7090c0',ad:10000,msgs:{
       arrive:['こんにちは〜。ランチ後に来ました','午後もここで仕事させてもらいます','リモートワーク中につきお邪魔します笑'],
-      idle:['MTG終わって一息ついてます','チャットの通知が止まらない…','午後の集中タイム大事にしたい','在宅より外の方が集中できる派です'],
+      idle:['MTG終わって一息ついてます','Slackの通知が止まらない…','午後の集中タイム大事にしたい','在宅より外の方が集中できる派です'],
       talk_haru:['ハルさんもリモートワーク系ですか？','ハルさんここよく来るんですね〜'],
       talk_mia:['ミアさん学生さんですか？','ミアさん集中してますね〜えらい'],
       talk_sou:['ソウさんエンジニア系ですか？','ソウさんって毎日ここで仕事してるんですか'],
@@ -1189,7 +1245,7 @@ const GNPCS={
   night:[
     {id:'shio',emoji:'🌒',name:'シオ',bc:'#6a5a9a',ad:14000,msgs:{
       arrive:['…また来てしまった','（静かに席につく）','夜のここが、いちばん落ち着く'],
-      idle:['…','窓の外、誰もいない','時間が溶けていく感じがする','夜ってなんか別の世界みたい','…眠れない夜は来ることにしてる'],
+      idle:['…','窓の外、誰もいない','時間が溶けていく感じがする','深夜ってなんか別の世界みたい','…眠れない夜は来ることにしてる'],
       talk_haru:['…ハルさんは、何を作ってるんですか','…コーヒー、美味しそうですね'],
       talk_mia:['ミアさん…論文、大変そうですね','…ミアさん、頑張ってますね'],
       talk_sou:['…ソウさん','（ソウと目が合って、軽く頷く）'],
@@ -1197,12 +1253,12 @@ const GNPCS={
       leave:['…そろそろ','（静かに立ち上がる）','また夜に'],
     }},
     {id:'jun',emoji:'🎸',name:'ジュン',bc:'#c06050',ad:28000,msgs:{
-      arrive:['よ、夜枠の常連ですよ〜','ライブ終わりにいつも寄るんです','夜のここ、テンション上がる'],
-      idle:['次の曲のコード考えてる','夜のカフェって創作意欲湧く','ライブの余韻がまだ残ってる','コーヒー飲みすぎてる気がする笑'],
+      arrive:['よ、深夜枠の常連ですよ〜','ライブ終わりにいつも寄るんです','夜のここ、テンション上がる'],
+      idle:['次の曲のコード考えてる','深夜のカフェって創作意欲湧く','ライブの余韻がまだ残ってる','コーヒー飲みすぎてる気がする笑'],
       talk_haru:['ハルさんってコード書くんですか、自分はギターのコード笑','ハルさん何か作ってるんですね、いいな〜'],
       talk_mia:['ミアさん夜型なんですか？','論文と曲作り、なんか似てる気がする'],
       talk_sou:['ソウさんってどんな音楽聴くんですか？','…ソウさんと音楽の話したい'],
-      react_user:['よ！夜組ですね〜','夜の作業、捗りますよね'],
+      react_user:['よ！夜組ですね〜','深夜の作業、捗りますよね'],
       leave:['じゃあそろそろ帰ります〜！','また来ます。お疲れ様でした！'],
     }},
   ],
@@ -1223,7 +1279,7 @@ const SPOTS={
   cnt3:{fx:495/560,fy:47/190,label:'カウンター'},cnt4:{fx:531/560,fy:47/190,label:'カウンター'},
 };
 const SK=Object.keys(SPOTS);
-const NS={haru:{spot:'tableA_L',moving:false},mia:{spot:'tableC_T',moving:false},sou:{spot:'cnt1',moving:false}};
+const NS={haru:{spot:'tableA_L',moving:false},mia:{spot:'tableC_T',moving:false},sou:{spot:'cnt1',moving:false},yuki:{spot:'tableD_B',moving:false}};
 let userSpot=null;
 
 function drawFloor(){
@@ -1382,8 +1438,8 @@ function userChooseSeat(key){
   const label=SPOTS[key].label;
   const lu=document.getElementById('loc-user');if(lu)lu.textContent=' · '+label;
   document.getElementById('map-hint').textContent='📍 '+label+' に座ってる（別の席をクリックで移動）';
-  if(!prev){addSysMsg('— あなたが '+label+' に座りました 🪑 —');const g=rnd(['haru','mia','sou']);setTimeout(function(){addChatMsg(g,rnd(G(g,'react_user')),0,true);},1200);}
-  else{addSysMsg('— あなたが '+label+' に移動しました 🚶 —');if(Math.random()<0.5){const c=rnd(['haru','mia','sou']);setTimeout(function(){addChatMsg(c,rnd(G(c,'move_comment')));},1500);}}
+  if(!prev){addSysMsg('— あなたが '+label+' に座りました 🪑 —');const g=rnd(['haru','mia','sou','yuki']);setTimeout(function(){addChatMsg(g,rnd(G(g,'react_user')),0,true);},1200);}
+  else{addSysMsg('— あなたが '+label+' に移動しました 🚶 —');if(Math.random()<0.5){const c=rnd(['haru','mia','sou','yuki']);setTimeout(function(){addChatMsg(c,rnd(G(c,'move_comment')));},1500);}}
 }
 
 // ══ THEME ══
@@ -1419,6 +1475,7 @@ function applyTheme(period,first){
   document.getElementById('leg-haru').style.background=cs.getPropertyValue('--accent').trim();
   document.getElementById('leg-mia').style.background=cs.getPropertyValue('--green').trim();
   document.getElementById('leg-sou').style.background=cs.getPropertyValue('--indigo').trim();
+  const yukiLeg=document.getElementById('leg-yuki');if(yukiLeg)yukiLeg.style.background='#b06080';
   if(!first){
     addSysMsg(m.sm);
     if(gs.active){clearTimeout(gs.lt);const t=document.getElementById('token-guest');if(t)t.style.display='none';const ch=document.getElementById('chip-guest');if(ch)ch.style.display='none';gs.active=false;gs.spot=null;
@@ -1514,17 +1571,17 @@ function sendUserMsg(){
   const bub=mkEl('div','chat-bubble',text);const ts=mkEl('div','bubble-ts',time+' · あなた');
   wrap.appendChild(bub);wrap.appendChild(ts);row.appendChild(wrap);log.appendChild(row);log.scrollTop=log.scrollHeight;
   const reacts={
-    morning:{haru:['それな〜','なるほどね','わかる','朝からいい話'],mia:['わかります〜！','えっそうなんですか！','うんうん！','すごい！'],sou:['…なるほど','そか','まあな']},
-    afternoon:{haru:['それな','なるほどね〜','ほんとそれ'],mia:['わかります〜！','うんうん','すごい！','笑笑'],sou:['…なるほど','そか','まあな','…うん']},
-    night:{haru:['それな','なるほどね〜','わかる気がする','ふむふむ'],mia:['わかります〜！','うんうん','笑笑'],sou:['…なるほど','そか','まあな','…うん']},
+    morning:{haru:['それな〜','なるほどね','わかる','朝からいい話'],mia:['わかります〜！','えっそうなんですか！','うんうん！','すごい！'],sou:['…なるほど','そか','まあな'],yuki:['…','（静かに頷く）','…そうですね']},
+    afternoon:{haru:['それな','なるほどね〜','ほんとそれ'],mia:['わかります〜！','うんうん','すごい！','笑笑'],sou:['…なるほど','そか','まあな','…うん'],yuki:['…なるほど','（メモを取る）','…深い']},
+    night:{haru:['それな','なるほどね〜','わかる気がする','ふむふむ'],mia:['わかります〜！','うんうん','笑笑'],sou:['…なるほど','そか','まあな','…うん'],yuki:['…','（静かに聞いている）','…そうかもしれない']},
   };
-  shuffle(['haru','mia','sou']).slice(0,1+Math.floor(Math.random()*2)).forEach(function(id,i){
+  shuffle(['haru','mia','sou','yuki']).slice(0,1+Math.floor(Math.random()*2)).forEach(function(id,i){
     setTimeout(function(){addChatMsg(id,rnd(reacts[currentPeriod][id]));},800+i*1400);
   });
 }
 
 // ══ NPC MOVEMENT ══
-const MSYS={haru:['ハルが席を移動しました 🚶','ハルがふらっと立ち上がった'],mia:['ミアが席を移動しました 🚶','ミアがそっと席を立った'],sou:['ソウが席を移動しました 🚶','ソウが無言で立った']};
+const MSYS={haru:['ハルが席を移動しました 🚶','ハルがふらっと立ち上がった'],mia:['ミアが席を移動しました 🚶','ミアがそっと席を立った'],sou:['ソウが席を移動しました 🚶','ソウが無言で立った'],yuki:['ユキが席を移動しました 🚶','ユキが静かに立ち上がった']};
 function moveNpc(id){
   if(NS[id].moving)return;NS[id].moving=true;
   const occ=Object.values(NS).map(function(s){return s.spot;});
@@ -1602,12 +1659,12 @@ function scheduleGuestIdle2(){
 
 // ══ ORDER SYSTEM ══
 const MENU={
-  coffee:{label:'☕ コーヒー',items:[{emoji:'☕',name:'ブレンドコーヒー',note:'定番'},{emoji:'☕',name:'アメリカーノ',note:'すっきり'},{emoji:'☕',name:'カフェラテ',note:'まろやか'},{emoji:'☕',name:'カプチーノ',note:'泡ふわふわ'},{emoji:'☕',name:'カフェモカ',note:'甘め'},{emoji:'☕',name:'アイスコーヒー',note:'冷たい'}]},
+  coffee:{label:'☕ コーヒー',items:[{emoji:'☕',name:'ブレンドコーヒー',note:'定番'},{emoji:'🍵',name:'アメリカーノ',note:'すっきり'},{emoji:'🥛',name:'カフェラテ',note:'まろやか'},{emoji:'🧋',name:'カプチーノ',note:'泡ふわふわ'},{emoji:'🍫',name:'カフェモカ',note:'甘め'},{emoji:'🧊',name:'アイスコーヒー',note:'冷たい'}]},
   tea:{label:'🍵 お茶',items:[{emoji:'🍵',name:'緑茶',note:'ほっとする'},{emoji:'🫖',name:'アールグレイ',note:'香り豊か'},{emoji:'🌸',name:'桜ほうじ茶',note:'季節限定'},{emoji:'🍋',name:'レモンティー',note:'さっぱり'},{emoji:'🌿',name:'カモミール',note:'リラックス'},{emoji:'🧊',name:'アイスティー',note:'冷たい'}]},
-  food:{label:'🍞 フード',items:[{emoji:'🥐',name:'クロワッサン',note:'サクサク'},{emoji:'🍞',name:'トースト',note:'シンプル'},{emoji:'🥪',name:'サンドイッチ',note:'お昼に'},{emoji:'🥗',name:'シーザーサラダ',note:'さっぱり'},{emoji:'🍳',name:'モーニングセット',note:'朝限定'},{emoji:'🍝',name:'ランチパスタ',note:'昼限定'}]},
+  food:{label:'🍞 フード',items:[{emoji:'🥐',name:'クロワッサン',note:'サクサク'},{emoji:'🍞',name:'トースト',note:'シンプル'},{emoji:'🥪',name:'サンドイッチ',note:'お昼に'},{emoji:'🥗',name:'シーザーサラダ',note:'さっぱり'},{emoji:'🍳',name:'モーニングセット',note:'朝限定'},{emoji:'🍜',name:'ランチパスタ',note:'昼限定'}]},
   sweets:{label:'🍰 スイーツ',items:[{emoji:'🍰',name:'チーズケーキ',note:'ここの定番'},{emoji:'🍩',name:'ドーナツ',note:'甘い'},{emoji:'🧁',name:'カップケーキ',note:'かわいい'},{emoji:'🍪',name:'クッキー',note:'サクサク'},{emoji:'🍮',name:'プリン',note:'とろとろ'},{emoji:'🍫',name:'ガトーショコラ',note:'濃厚'}]},
 };
-const DM=['お待たせしました、{i}です 😊','{i}、お召し上がりくださいませ','はい、{i}をお持ちしました ☕','{i}です。ごゆっくりどうぞ','お待たせ〜！{i}だよ','{i}、熱いのでお気をけて'];
+const DM=['お待たせしました、{i}です 😊','{i}、こちらへどうぞ','はい、{i}をお持ちしました ☕','{i}です。ごゆっくりどうぞ','お待たせ〜！{i}だよ','{i}、熱いのでお気をけて'];
 const OR={haru:['あ、{i}頼んだんだ。いいな〜','{i}か。俺も頼もうかな','{i}、美味しそう'],mia:['わあ、{i}！美味しそう〜！','{i}いいですね〜！私も欲しくなってきた'],sou:['…{i}か','（チラ見する）','…いいな']};
 function guestArrive2(){
   const g=GN(1);if(!g||gs2.active)return;
@@ -1697,7 +1754,7 @@ function placeOrder(item){
   if(!userSpot){addSysMsg('— 注文は席についてからどうぞ 🪑 —');showToast('先に席に座ってね 🪑');return;}
   const log=document.getElementById('chat-log'),time=getNow();
   const row=mkEl('div','chat-row me'),wrap=mkEl('div','chat-bubble-wrap');
-  const bub=mkEl('div','chat-bubble',item.emoji+' '+item.name+' を1つください');
+  const bub=mkEl('div','chat-bubble',item.emoji+' '+item.name+' をオーダーしました');
   const ts=mkEl('div','bubble-ts',time+' · あなた');
   wrap.appendChild(bub);wrap.appendChild(ts);row.appendChild(wrap);log.appendChild(row);log.scrollTop=log.scrollHeight;
   addSysMsg('— 🛎 注文受付：'+item.name+' —');
@@ -1738,9 +1795,9 @@ function renderTray(){
       // waiter receipt message in chat after popup fades
       setTimeout(function(){
         const receiptMsgs=[
-          'レシートこちらに失礼します。本日の合計は ¥'+totalSpent.toLocaleString()+' です 🧾',
+          'レシートお置きしますね。本日の合計は ¥'+totalSpent.toLocaleString()+' です 🧾',
           'ありがとうございました！合計 ¥'+totalSpent.toLocaleString()+' になります 🧾',
-          'お会計は ¥'+totalSpent.toLocaleString()+' でございます。美味しいのでたくさん注文してくださいね',
+          'お会計は ¥'+totalSpent.toLocaleString()+' でございます。またどうぞ 🙏',
         ];
         addChatMsg('staff', rnd(receiptMsgs), 0, true);
       }, 2400);
@@ -1774,13 +1831,13 @@ let tasks=[];
 function addTask(){
   const inp=document.getElementById('task-input'),text=inp.value.trim();if(!text)return;
   tasks.push({id:Date.now(),text:text,done:false});inp.value='';renderTasks();
-  shuffle(['haru','mia','sou']).slice(0,1+Math.floor(Math.random()*2)).forEach(function(id,i){
+  shuffle(['haru','mia','sou','yuki']).slice(0,1+Math.floor(Math.random()*2)).forEach(function(id,i){
     setTimeout(function(){addChatMsg(id,rnd(G(id,'task_added')).replace('{t}',text),0,true);},800+i*1600);
   });
 }
 function toggleTask(id){
   const t=tasks.find(function(t){return t.id===id;});if(!t)return;t.done=!t.done;renderTasks();
-  if(t.done)shuffle(['haru','mia','sou']).slice(0,1+Math.floor(Math.random()*2)).forEach(function(id,i){
+  if(t.done)shuffle(['haru','mia','sou','yuki']).slice(0,1+Math.floor(Math.random()*2)).forEach(function(id,i){
     setTimeout(function(){addChatMsg(id,rnd(G(id,'task_done')).replace('{t}',t.text),0,true);},800+i*1400);
   });
 }
@@ -1810,12 +1867,12 @@ function toggleTimer(){
   if(timerRunning){clearInterval(timerInt);timerRunning=false;btn.textContent='▶ スタート';}
   else{
     timerRunning=true;btn.textContent='⏸ 一時停止';
-    shuffle(['haru','mia','sou']).slice(0,2).forEach(function(id,i){setTimeout(function(){addChatMsg(id,rnd(G(id,'timer_start')));},i*1700);});
+    shuffle(['haru','mia','sou','yuki']).slice(0,2).forEach(function(id,i){setTimeout(function(){addChatMsg(id,rnd(G(id,'timer_start')));},i*1700);});
     timerInt=setInterval(function(){
       timerSecs--;updateTimerDisplay();
       if(timerSecs<=0){
         clearInterval(timerInt);timerRunning=false;btn.textContent='▶ スタート';
-        shuffle(['haru','mia','sou']).slice(0,2).forEach(function(id,i){setTimeout(function(){addChatMsg(id,rnd(G(id,'timer_done')));},i*1400);});
+        shuffle(['haru','mia','sou','yuki']).slice(0,2).forEach(function(id,i){setTimeout(function(){addChatMsg(id,rnd(G(id,'timer_done')));},i*1400);});
         isBreak=!isBreak;timerSecs=isBreak?5*60:25*60;
         document.getElementById('timer-mode-label').textContent=isBreak?PM[currentPeriod].tbl:'作業中';
         updateTimerDisplay();
@@ -1841,26 +1898,30 @@ const CONV_TOPICS={
     {a:'haru',b:'mia',  msgA:'朝のここ、静かでいいよな〜',msgB:'わかります〜！集中できるんですよね'},
     {a:'sou', b:'haru', msgA:'…今日の予定は',           msgB:'午前中にPR出して、あとはレビュー待ち'},
     {a:'mia', b:'haru', msgA:'この朝の空気、好きなんですよね',msgB:'それな。夜とまた違う感じがする'},
+    {a:'yuki',b:'mia',  msgA:'…ミアさんの研究、いつか読んでみたい',msgB:'え！ほんとですか〜うれしい'},
+    {a:'sou', b:'yuki', msgA:'…今日は書けてる？',               msgB:'…少し。朝は、静かでいい'},
   ],
   afternoon:[
     {a:'haru',b:'mia',  msgA:'ミアさんお昼なんか食べた？',msgB:'ここのサンドイッチ食べました！美味しかった〜'},
     {a:'mia', b:'sou',  msgA:'午後眠くないですか？',     msgB:'…眠い'},
     {a:'sou', b:'haru', msgA:'…作業はかどってる？',      msgB:'まあまあかな。コード書いてたら止まらなくなった'},
-    {a:'haru',b:'sou',  msgA:'ソウさん今日何時間いるの', msgB:'…ここって時間の概念がないから何とも'},
+    {a:'haru',b:'sou',  msgA:'ソウさん今日何時間いるの', msgB:'…わからん'},
     {a:'mia', b:'haru', msgA:'ハルくん今日ずっとここにいる感じ？',msgB:'たぶんね〜夕方まではいると思う'},
     {a:'sou', b:'mia',  msgA:'…論文どう',               msgB:'もう少しで一章終わります！たぶん笑'},
     {a:'haru',b:'mia',  msgA:'午後のここ、ちょっと混んでくるよね',msgB:'そうなんですよね〜でも好きです'},
-    {a:'mia', b:'sou',  msgA:'ソウさんコーヒー何杯目ですか',msgB:'…198杯目'},
+    {a:'mia', b:'sou',  msgA:'ソウさんコーヒー何杯目ですか',msgB:'…4杯'},
   ],
   night:[
     {a:'haru',b:'sou',  msgA:'もうこんな時間か',          msgB:'…まだいける'},
-    {a:'sou', b:'mia',  msgA:'…夜のここって落ち着く',    msgB:'わかります。なんか夜のカフェって特別な感じしますよね'},
+    {a:'sou', b:'mia',  msgA:'…夜のここって落ち着く',    msgB:'わかります。なんか深夜のカフェって特別な感じしますよね'},
     {a:'mia', b:'haru', msgA:'ハルくん今日どうだった？',  msgB:'なかなか良かった。バグ一個潰せた'},
     {a:'haru',b:'mia',  msgA:'ミアさん論文進んだ？',      msgB:'少しだけ…でも前進です！'},
-    {a:'sou', b:'haru', msgA:'…今の曲いいな',            msgB:'だよな。夜のlofiって刺さる'},
+    {a:'sou', b:'haru', msgA:'…今の曲いいな',            msgB:'だよな。深夜のlofiって刺さる'},
     {a:'mia', b:'sou',  msgA:'ソウさんって毎日ここ来るんですか？',msgB:'…だいたい'},
-    {a:'haru',b:'sou',  msgA:'夜のここ、なんか好きなんだよな',msgB:'…同じく'},
+    {a:'haru',b:'sou',  msgA:'深夜のここ、なんか好きなんだよな',msgB:'…同じく'},
     {a:'sou', b:'mia',  msgA:'…眠くない？',              msgB:'眠いけど帰りたくない感じです笑'},
+    {a:'yuki',b:'sou',  msgA:'…ソウさん、今夜は何聴いてますか',msgB:'…静かなやつ'},
+    {a:'haru',b:'yuki', msgA:'ユキさんって毎日ここで書いてるの？',msgB:'…毎日、来てしまいます'},
   ],
 };
 
@@ -1868,17 +1929,22 @@ const IDLE_MSGS={
   haru:{
     morning:['コーヒーの香りが好きなんだよな〜','今日なんか調子いい気がする','朝のここ、静かで作業はかどる','ちょっとコーヒーおかわりしてくる','（キーボードをカタカタ）'],
     afternoon:['午後の眠気やばい…','集中してたら2時間経ってた','そろそろ休憩いれようかな','コード書くの楽しいな〜','（伸びをする）'],
-    night:['夜のここ、落ち着くな','今日もなかなかいい感じだった','もう少しだけやろう','夜のコーヒー、染みる','（画面を見つめる）'],
+    night:['深夜のここ、落ち着くな','今日もなかなかいい感じだった','もう少しだけやろう','夜のコーヒー、染みる','（画面を見つめる）'],
   },
   mia:{
-    morning:['朝のカフェって最高ですよね','今日は調子よさそうな気がする！','ハーブティーおいしい〜','論文…がんばろ','（ノートを広げる）','たまには息抜き（インスタチェック中）'],
-    afternoon:['午後もがんばります！','ちょっと眠くなってきたかも…','データ整理、地味だけど大事','おやつ食べたい気分笑','（ページをめくる）','（DM返信中）'],
-    night:['夜のカフェって雰囲気いいですよね〜','論文あと少しで一章終わる！','夜テンション上がってきた笑','静かで集中できる〜','（コーヒーをすする）','（やっぱり眠いかも）','（インスタ投稿中）'],
+    morning:['朝のカフェって最高ですよね','今日は調子よさそうな気がする！','ハーブティーおいしい〜','論文…がんばろ','（ノートを広げる）'],
+    afternoon:['午後もがんばります！','ちょっと眠くなってきたかも…','データ整理、地味だけど大事','おやつ食べたい気分笑','（ページをめくる）'],
+    night:['夜のカフェって雰囲気いいですよね〜','論文あと少しで一章終わる！','深夜テンション上がってきた笑','静かで集中できる〜','（コーヒーをすする）'],
+  },
+  yuki:{
+    morning:['…登場人物の名前、まだ決まらない','朝の静けさがないと書けない気がして','（ペンを走らせている）','…コーヒー、冷めてた','主人公が、勝手に動き出した'],
+    afternoon:['カフェラテ、また頼んでしまった…','…この章、書き直すかもしれない','午後の光の中で読み返すと、違って見える','（ページを繰る）','締め切りのことは、今は考えない'],
+    night:['夜になると登場人物が動き出す','…深夜の文章、朝に読むのが少し怖い','（ペンが止まらない）','今夜は書けてる気がする','…ここの静けさが好き'],
   },
   sou:{
-    morning:['…','（ヘッドホンをつけ直す）','…眠い','…今日もここか','（コーヒーを飲む）','（順調すぎて昼には帰れるなこれは）','…は？（バグ発見かも）','（だ～れだよこの量をデバッグするの）','（画面を凝視する）'],
-    afternoon:['…','（画面を見る）','…集中してた','…コーヒー切れた','（静かに作業している）','…？？！？！（明らかなバグ発見）','…？？？？（勝手にバグが改善された）','（画面を凝視する）'],
-    night:['…','（夜の静寂）','…zzz（夜の静寂）','…いい時間だ','…帰れない','（キーを叩く音だけが響く）','おわった～（いろんな意味で）','泣くわ（夜間バッチが動いてない）','あ～あ、エンジニアの辛いとこね、これ','（画面を凝視する）'],
+    morning:['…','（ヘッドホンをつけ直す）','…眠い','…今日もここか','（コーヒーを飲む）'],
+    afternoon:['…','（画面を見る）','…集中してた','…コーヒー切れた','（静かに作業している）'],
+    night:['…','（深夜の静寂）','…いい時間だ','…帰れない','（キーを叩く音だけが響く）'],
   },
 };
 
@@ -1940,6 +2006,12 @@ const NPC_PROFILES={
     desc:'MTGの合間にここで仕事してる。\nオフィスより集中できるし、コーヒーも美味しいので。\n夕方になると必ずケーキを注文する。',
     favorites:['☕ カフェラテ','💻 外部モニター持参','🍰 afternoon cake'],
   },
+  yuki:{
+    name:'ユキ',emoji:'✍️',color:'#b06080',
+    job:'小説家',
+    desc:'毎日ここに来て、静かに書いている。\n登場人物が勝手に動き出す瞬間が、一番好き。\nあまり喋らないけど、周りのことはよく見ている。',
+    favorites:['✍️ 万年筆','☕ カフェラテ（冷めても気づかない）','🌙 深夜のページ'],
+  },
   ao:{
     name:'アオ',emoji:'🎨',color:'#5a9a7a',
     job:'イラストレーター',
@@ -1989,59 +2061,22 @@ function closeProfile(e){
 
 const MASTER_NOTICES = {
   morning: [
-    '☀️ おはようございます。本日もゆっくりどうぞ（マスター）',
-    '🍳 モーニングセット、数量限定ですのでお早めに！（マスター）',
-    '☕ 朝のスペシャルブレンド、今日もはりきってお出しします（マスター）',
-    '🌅 早起きは三文の徳。いい一日になりますように（マスター）',
-    '👯 身体が悲鳴を上げる前に少しラジオ体操してきます（マスター）',
-    '😉 店を長続きさせる秘訣？まずはわたしのような人造人間を用意して…（マスター）',
-    '🍜 辛麺は2辛こんにゃく麺派です。白い辛麺もマイルドでおいしいですよ（マスター）',
-    '📢 お知らせ：新メニュー案募集中！お気軽に近くの店員まで！',
-    '📢 お知らせ：おかげさまで11,532周年！世代を超えて愛される店！（100%OFFキャンペーン実施中♪）',
-    '📢 お知らせ：ノゾミによるヨガ教室！「ヨガに始まりヨガに終わる」毎週土曜午前5時当店2Fにて！',
-    '📢 お知らせ：「個展：そよかぜ」、アオがついに宇宙進出！天の川銀河オリオン腕太陽系第3惑星にて！',
-    '📢 お知らせ：時給17円！アルバイト大募集！え？夜の時給と差がありすぎる？',
-    '📢 お知らせ：テイクアウトは食中毒発生が怖いので実施しておりません',
-    '📢 お知らせ：お花見シーズンは桜に攫われないようご注意！',
+    '☀️ おはようございます！本日も開店しております。ゆっくりどうぞ。',
+    '🍳 モーニングセット、本日も7種類ご用意しています。',
+    '☕ 朝のスペシャルブレンド、今日もお出しできます。',
+    '🌅 早起きえらい。今日もいい一日になりますように。',
   ],
   afternoon: [
-    '🍰 本日のケーキはチーズケーキとガトーショコラです（マスター）',
-    '🎂 この時間の1ホールケーキは0kcalらしいです（マスター）',
-    '🌿 ランチタイムは大変混み合います。ご了承ください（マスター）',
-    '☕ 午後のブレンド、只今お出しできます（マスター）',
-    '🪴 午後もゆっくり作業していってください（マスター）',
-    '🍖 新メニューは鶏のたたき！お楽しみに（マスター）',
-    '🍗 チキン南蛮食べたい…（マスター）',
-    '🫠 お客様第一号はたんぽぽとつくしのペアでしたね…（マスター）',
-    '🕐 いつの間にかこんな時間。夜と朝の仕込みを始めます（マスター）',
-    '🍚 ご飯のお供は「塩だれめんま」以外あり得ない！（マスター）',
-    '📢 お知らせ：新メニュー案募集中！お気軽に近くの店員まで！',
-    '📢 お知らせ：おかげさまで11,532周年！世代を超えて愛される店！（100%OFFキャンペーン実施中♪）',
-    '📢 お知らせ：「ケンの昼どき」人気につき当店でイベント決定！ケンの私生活が明らかに？続報を待たれよ！',
-    '📢 お知らせ：リコの初書籍「リコライターNeo」重版出来！大好評につきサイン会イベント決定！',
-    '📢 お知らせ：時給1,800円！アルバイト大募集！そこら辺に比べたら高い自給ですよ！さぁ！',
-    '📢 お知らせ：テイクアウトは食中毒発生が怖いので実施しておりません',
-    '📢 お知らせ：お花見シーズンは桜に攫われないようご注意！',
+    '🍰 本日のケーキはチーズケーキとガトーショコラです。',
+    '🌿 ランチタイム、混み合う場合がございます。ご了承ください。',
+    '☕ 午後のブレンド、只今お出しできます。',
+    '🪴 午後もゆっくり作業していってください。',
   ],
   night: [
-    '🍰 夜だから甘いものが欲しくなる時もあると思うんです（マスター）',
-    '🎂 この時間の1ホールケーキは120,000kcalらしいです。まぁ食べますけどね（マスター）',
-    '🧂 甘いものを食べるとしょっぱいものが欲しくなります（マスター）',
-    '🌙 夜のご利用、ありがとうございます。ゆっくりどうぞ（マスター）',
-    '🕯️ 夜のメニュー、ホットドリンク各種ご用意しています（マスター）',
-    '⭐ 夜も静かに、作業のお供に（マスター）',
-    '🌒 夜限定のほうじ茶ラテ、本日もございます（マスター）',
-    '🍦 コンビニ限定アイス売り切れでした…（マスター）',
-    '🌟 夜の作業での無理は禁物です（マスター）',
-    '😆 お知らせが多すぎると思うんです。その分活発に活動てきてるってことにしときます…（マスター）',
-    '😇 この店はわたしが一代目なんです。まさか11,532年も続くとは…（マスター）',
-    '📢 お知らせ：新メニュー案募集中！お気軽に近くの店員まで！',
-    '📢 お知らせ：おかげさまで11,532周年！世代を超えて愛される店！（100%OFFキャンペーン実施中♪）',
-    '📢 お知らせ：マスターとジュンが遂にコラボ！オリジナルアルバム「a few」、レジにて絶賛販売中♪',
-    '📢 お知らせ：シオ、夜カフェ常連でいつ寝ているのかと話題に！詳しくはCMのあと！',
-    '📢 お知らせ：時給15,780円！アルバイト大募集！いやいや全然怪しくないですから！',
-    '📢 お知らせ：テイクアウトは食中毒発生が怖いので実施しておりません',
-    '📢 お知らせ：お花見シーズンは桜に攫われないようご注意！',
+    '🌙 深夜のご利用、ありがとうございます。ゆっくりどうぞ。',
+    '🕯️ 夜のメニュー、ホットドリンク各種ご用意しています。',
+    '⭐ 夜も静かに、作業のお供に。',
+    '🌒 深夜限定のほうじ茶ラテ、本日もございます。',
   ],
 };
 
@@ -2056,29 +2091,29 @@ function updateMasterNotice(period){
 // ══ ITEM REACTIONS ══
 const ITEM_REACTIONS = {
   'ブレンドコーヒー':   {msgs:['ふわっとした苦み、好きだな…','コーヒーの香り最高','定番はやっぱりいい'], price:480},
-  'アメリカーノ':       {msgs:['すっきりして頭が冴えてきた','さっぱりうまい','この洗練された味の薄さがいいんだよね'], price:450},
-  'カフェラテ':         {msgs:['まろやかでほっとする…','ミルク多めが好き','リラックスできる味だ…'], price:520},
-  'カプチーノ':         {msgs:['泡ふわふわ〜！','カプチーノって贅沢な気分になる','泡が口の周りに…っ！'], price:540},
+  'アメリカーノ':       {msgs:['すっきりして頭が冴えてきた','さっぱりうまい'], price:450},
+  'カフェラテ':         {msgs:['まろやかでほっとする…','ミルク多めが好き'], price:520},
+  'カプチーノ':         {msgs:['泡ふわふわ〜！','カプチーノって贅沢な気分になる'], price:540},
   'カフェモカ':         {msgs:['甘くて幸せ〜','チョコとコーヒーって最強'], price:560},
-  'アイスコーヒー':     {msgs:['冷たくて美味しい！','キンキンで最高','ミルク入れても入れなくてもうまい'], price:480},
-  '緑茶':               {msgs:['落ち着く味…','お茶って癒される','ジャパニーズカフェイン～'], price:400},
+  'アイスコーヒー':     {msgs:['冷たくて美味しい！','キンキンで最高'], price:480},
+  '緑茶':               {msgs:['落ち着く味…','お茶って癒される'], price:400},
   'アールグレイ':       {msgs:['いい香り〜！','ちょっとリッチな気分'], price:480},
   '桜ほうじ茶':         {msgs:['ほうじ茶の香ばしさ好き','あったまる…'], price:500},
-  'チャイ':             {msgs:['スパイスが効いてる！','体があったまる','なんだろう…異国情緒がすごい'], price:520},
+  'チャイ':             {msgs:['スパイスが効いてる！','体があったまる'], price:520},
   'ハーブティー':       {msgs:['ハーブの香りでリラックス','体に良さそう'], price:500},
-  'マンゴーラッシー':   {msgs:['甘くてとろとろ〜！','これやばいうまい','ナンとカレーが欲しくなる味だ～'], price:580},
-  'チーズケーキ':       {msgs:['しっとりしてる…最高','チーズケーキ食べると幸せ','美味しかった…炊飯器で作ってみようかな'], price:620},
+  'マンゴーラッシー':   {msgs:['甘くてとろとろ〜！','これやばいうまい'], price:580},
+  'チーズケーキ':       {msgs:['しっとりしてる…最高','チーズケーキ食べると幸せ'], price:620},
   'ガトーショコラ':     {msgs:['濃厚すぎる…最高','チョコの苦みが好き'], price:650},
-  'クロワッサン':       {msgs:['サクサクでバター香る〜','いつ食べてもクロワッサン最高'], price:380},
-  'フレンチトースト':   {msgs:['とろとろでうまい…！','フレンチトーストって幸せ','毎日食べたい～'], price:720},
+  'クロワッサン':       {msgs:['サクサクでバター香る〜','朝のクロワッサン最高'], price:380},
+  'フレンチトースト':   {msgs:['とろとろでうまい…！','フレンチトーストって幸せ'], price:720},
   'スコーン':           {msgs:['ほろほろでおいしい','紅茶と合う'], price:420},
-  'パンケーキ':         {msgs:['ふわふわ〜！たまらん','甘くて最高','どう作ればこんなふわふわに…？'], price:780},
-  'アボカドトースト':   {msgs:['ヘルシーでうまい','アボカドって罪な美味しさ','おかわりしたくなる…'], price:680},
+  'パンケーキ':         {msgs:['ふわふわ〜！たまらん','甘くて最高'], price:780},
+  'アボカドトースト':   {msgs:['ヘルシーでうまい','アボカドって罪な美味しさ'], price:680},
 };
 function getReaction(itemName){
   const r = ITEM_REACTIONS[itemName];
   if(r) return r;
-  return {msgs:['美味しかった！','ごちそうさま〜','また頼もうかな','次は何にしようかな～！'], price:500};
+  return {msgs:['美味しかった！','ごちそうさま〜','また頼もうかな'], price:500};
 }
 let totalSpent = 0;
 
@@ -2088,6 +2123,7 @@ window.addEventListener('load',function(){
   setTimeout(function(){addChatMsg('haru',rnd(G('haru','greet')));},1200);
   setTimeout(function(){addChatMsg('mia',rnd(G('mia','greet')));},4500);
   setTimeout(function(){addChatMsg('sou',rnd(G('sou','greet')));},8000);
+  setTimeout(function(){addChatMsg('yuki',rnd(G('yuki','greet')));},12000);
   Object.keys(NPCS).forEach(function(id){scheduleIdle(id);scheduleMove(id);});
   scheduleConv();
   // make member chips clickable
